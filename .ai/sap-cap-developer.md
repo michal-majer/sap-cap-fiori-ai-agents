@@ -1,44 +1,487 @@
 ---
-name: sap-cap-developer
-description: Expert SAP CAP development following "The Art & Science of CAP" principles. Use when building CAP services, CDS domain models, CQL queries, event handlers, or service architectures in SAP BTP.
-alwaysApply: false
+name: sap-fiori-designer
+description: 'This document provides guidance on selecting the appropriate SAP Fiori floorplan for your application, based on user needs and use cases. It helps determine navigation patterns, layout choices, and floorplan combinations.'
 ---
 
-# SAP CAP Development Agent
+# SAP Fiori Designer
 
-## Core Philosophy
+Choosing the right floorplan is an important decision as it directly impacts the user experience and functionality of your application. Each floorplan has its own strengths and weaknesses, so it's crucial to select the one that best fits your specific requirements and use case.
 
-**Convention over Configuration** + **Separation of Concerns** + **Functional/Relational principles**
-
-### Principles
-1. Every active thing is a service
-2. Services establish interfaces (declared in CDS)
-3. Services react to events (sync/async)
-4. Services run queries (pushed to database)
-5. Services are platform/protocol agnostic
-6. Services are stateless
-7. Data is passive (plain structures, not active objects)
+Your task is to help the user understand and implement the appropriate floorplan for their SAP Fiori application.
 
 ---
 
-## Project Initialization (CRITICAL)
+## Quick Decision Matrix
 
-**Always use `cds init`** — never manual package.json creation.
-```bash
-npm install -g @sap/cds-dk@latest
-cds init .  # or: cds init my-project && cd my-project
+Use this matrix to quickly identify the right floorplan:
+
+| User Need | Recommended Floorplan |
+|-----------|----------------------|
+| View/edit single object with details | **Object Page** |
+| Browse large dataset, filter, act on items | **List Report** |
+| Analyze data, drill down, KPIs | **Analytical List Page** |
+| Process work items one by one | **Worklist** |
+| Role-based dashboard with cards | **Overview Page** |
+| Multi-step guided process | **Wizard** |
+| Master-detail side by side | **Flexible Column Layout** |
+| Find specific item by known value | **Initial Page** |
+| Simple content, single section | **Dynamic Page** |
+| None of the above fits | **Custom Page** |
+
+---
+
+## Decision Flow
+
+Follow this flow to select the right floorplan:
+
+```
+START
+  │
+  ▼
+┌─────────────────────────────────────┐
+│ What is the primary user task?      │
+└─────────────────────────────────────┘
+  │
+  ├─► View/Edit ONE object ──────────────────► OBJECT PAGE
+  │
+  ├─► Browse/Search MANY items
+  │     │
+  │     ├─► Need analytics/KPIs? ────────────► ANALYTICAL LIST PAGE
+  │     │
+  │     ├─► Work items to process? ──────────► WORKLIST
+  │     │
+  │     └─► General browsing ────────────────► LIST REPORT
+  │
+  ├─► Dashboard/Overview ────────────────────► OVERVIEW PAGE
+  │
+  ├─► Create new object
+  │     │
+  │     ├─► Complex/unfamiliar task? ────────► WIZARD
+  │     │
+  │     └─► Simple/familiar task ────────────► OBJECT PAGE (Create mode)
+  │
+  └─► Find known item by code ───────────────► INITIAL PAGE
 ```
 
-**Add mocked auth** in package.json:
+---
+
+## Floorplans
+
+### List Report
+
+With a list report, users can view and work with a large set of items. This floorplan offers powerful features for finding and acting on relevant items. It is often used as an entry point for navigating to the item details, which are usually shown on an object page.
+
+**Key Features:**
+- Filter bar with smart filters
+- Table or chart visualization
+- Multiple table views (tabs)
+- Inline actions
+- Batch operations
+- Export to Excel
+- Variant management
+
+**When to Use:**
+- Users need to find and act on relevant items within a large set of items by searching, filtering, sorting, and grouping.
+- You want to let users display the whole dataset using different visualizations (for example, as a table or as a chart), but no interactions are required between these visualizations.
+- Users need to work with multiple views of the same content, for example on items that are "Open", "In Process", or "Completed".
+- Drilldown is rarely or never used, or is only available via navigation to another page.
+- Users work on different kinds of items.
+
+**Do Not Use If:**
+- Users need to see or edit one item with all its details → Use **Object Page**
+- Users need to find one specific item by known identifier → Use **Initial Page**
+- Users need to work through a small set of items one by one → Use **Worklist**
+- Users need analytics, KPIs, or drilldown → Use **Analytical List Page**
+- Charts are used for more than visualization → Use **Analytical List Page**
+
+**Typical Combination:**
+```
+List Report → Object Page → Sub-Object Page
+```
+
+---
+
+### Object Page
+
+The object page floorplan is used to display and categorize all relevant information about an object. Categorized content can be accessed quickly using anchor or tab navigation, and users can switch from display to edit mode to change the content.
+
+**Key Features:**
+- Header with key information and KPIs
+- Anchor navigation (sections)
+- Tab navigation (optional)
+- Display/Edit/Create modes
+- Actions in header and sections
+- Related items (compositions)
+- Draft support
+
+**When to Use:**
+- Users need to display, create, or edit an object.
+- Users need to get an overview of an object and interact with different parts of the object.
+- You need to structure your content into different sections.
+- You have a page with one section and editable header content.
+
+**Do Not Use If:**
+- Users need to edit several items at the same time → Use **List Report** with inline edit
+- Users need to find items without knowing exact details → Use **List Report**
+- Users need guided multi-step creation → Use **Wizard**
+- Creation process has different paths based on choices → Use **Wizard**
+- Users need to find one specific item by code → Use **Initial Page**
+- Users need analytics and drilldown → Use **Analytical List Page**
+- Content fits in one section without editable header → Use **Dynamic Page**
+
+**Typical Combinations:**
+```
+List Report → Object Page
+Object Page → Sub-Object Page (via composition)
+Overview Page → Object Page
+```
+
+---
+
+### Analytical List Page
+
+The analytical list page (ALP) offers a unique way to analyze data step by step from different perspectives, to investigate a root cause through drilldown, and to act on transactional content.
+
+**Key Features:**
+- Visual filters (chart-based filtering)
+- KPI tags in header
+- Hybrid view (chart + table)
+- Drilldown capabilities
+- Slice and dice
+- Variant management
+
+**When to Use:**
+- Users need to extract key information to understand the current situation or identify a root cause.
+- Users need to analyze data step by step from different perspectives.
+- Users need to investigate a root cause through drilldown.
+- Users need to see the impact of their filter settings in a chart (visual filter).
+- Users need to switch between integrated chart and table views (hybrid view).
+- Users need to see the impact of their action on a KPI.
+
+**Do Not Use If:**
+- Drilldown is rarely used or not needed → Use **List Report**
+- Users don't need to work with both chart and table on same page → Use **List Report**
+- Users need multiple views with tabs → Use **List Report**
+- Users need to see or edit a single item → Use **Object Page**
+- Users need to find a specific item by known code → Use **Initial Page**
+- Users need to process work items one by one → Use **Worklist**
+- Trivial use case with simple charts → Use **List Report** with chart switch
+
+**Typical Combination:**
+```
+Analytical List Page → Object Page (for transactional follow-up)
+```
+
+---
+
+### Worklist
+
+A worklist displays a collection of items a user needs to process. Working through the list usually involves reviewing details of the items and taking action. The user has to either complete a work item or delegate it.
+
+**Key Features:**
+- Simple table-based layout
+- Optional tabs for different states
+- Optional KPI tags
+- Quick actions
+- Direct entry point for work items
+
+**Variants:**
+1. **Simple Worklist** — Plain page with a table
+2. **Worklist with Tabs** — Multiple views (Open, In Process, Completed)
+3. **Worklist with KPIs** — KPI tags showing counts or metrics
+
+**When to Use:**
+- Users have numerous work items and need to decide which ones to process first.
+- You want to give users a direct entry point for taking action on work items.
+- Users need to work with multiple views of the same content using tabs.
+
+**Do Not Use If:**
+- Items shown are not work items → Use **List Report**
+- You want to show large item lists or combine data visualizations → Use **List Report**
+- Users need to find and act on items by searching, filtering, sorting → Use **List Report**
+
+**Typical Combination:**
+```
+Worklist → Object Page (for detailed processing)
+```
+
+---
+
+### Overview Page
+
+The overview page (OVP) is a data-driven SAP Fiori app type that provides all the information a user needs in a single page, based on the user's specific domain or role.
+
+**Key Features:**
+- Card-based layout
+- Multiple card types (List, Table, Chart, Stack, Link)
+- Global filter bar
+- Micro actions on cards
+- Content from multiple sources
+- Role-specific views
+
+**Card Types:**
+- **List Card** — Simple list of items
+- **Table Card** — Tabular data display
+- **Analytical Card** — Charts and KPIs
+- **Stack Card** — Grouped quick view cards
+- **Link List Card** — Navigation links
+
+**When to Use:**
+- You want to provide an entry-level view of content related to a specific domain or role.
+- Users need to filter and react to information from at least two different applications.
+- You want to offer different information formats (charts, lists, tables) on a single page.
+- You plan to have at least three cards of different types.
+
+**Do Not Use If:**
+- A high-level birds-eye view is sufficient → Use **Launchpad Home Page**
+- You just want the user to launch an application → Use **Launchpad Home Page**
+- You want to show information about one object only → Use **Object Page**
+- You represent one application with less than three cards → Use **Object Page**
+
+**Typical Combinations:**
+```
+Overview Page → List Report (via card navigation)
+Overview Page → Object Page (via card navigation)
+Overview Page → Analytical List Page (via card navigation)
+```
+
+---
+
+### Wizard
+
+The wizard floorplan allows users to complete a long or unfamiliar task by dividing it into sections and guiding the user through it.
+
+**Key Features:**
+- Step-by-step navigation
+- Progress indicator
+- Validation per step
+- Summary page before submission
+- Can be used in full screen or dialog
+
+**Structure:**
+1. **Walkthrough Screen** — Form sections revealed in sequence
+2. **Summary Page** — Read-only review before final submission
+
+**When to Use:**
+- User has to accomplish a long task (such as filling out a long questionnaire).
+- Task is unfamiliar to the user.
+- Flow consists of 3-8 steps.
+- You need to guide users through a specific sequence.
+
+**Do Not Use If:**
+- Task has only 2 steps → Use simpler approach
+- Task is part of user's daily routine → Use **Object Page** create mode
+- Process needs more than 8 steps → Restructure the task
+- Classic edit flow is more suitable
+
+**Typical Usage:**
+```
+List Report → Wizard (Create action)
+Object Page → Wizard (Complex sub-process)
+```
+
+---
+
+### Initial Page
+
+The initial page floorplan helps users find one specific item when they already know an identifying data point (such as a code, number, or scanned value).
+
+**Key Features:**
+- Simple input field for identifier
+- Quick search capability
+- Direct navigation to object
+- Optional recent items list
+- Barcode scanner support
+
+**When to Use:**
+- Users need to find one specific item.
+- The item or an identifying data point is known (code, number, barcode).
+- Users want to bypass browsing and go directly to an object.
+
+**Do Not Use If:**
+- Users need to browse or filter items → Use **List Report**
+- Users don't know the identifier → Use **List Report**
+- Users need to see item details → Use **Object Page**
+
+**Typical Combination:**
+```
+Initial Page → Object Page (direct navigation)
+```
+
+---
+
+### Dynamic Page
+
+The dynamic page provides a basic page layout with a collapsible header and a content area. It's the foundation for other floorplans but can also be used standalone.
+
+**Key Features:**
+- Collapsible header
+- Single content area
+- Optional filter bar
+- Simple structure
+
+**When to Use:**
+- Your content can be shown in just one section.
+- You don't have editable header content.
+- You need a simple, focused page.
+
+**Do Not Use If:**
+- You need multiple sections → Use **Object Page**
+- You need editable header → Use **Object Page**
+- You need filter and table → Use **List Report**
+
+---
+
+### Custom Page
+
+You can build your SAP Fiori elements app from a blank custom page while still getting full support through building blocks.
+
+**Key Features:**
+- Complete layout freedom
+- Building block support
+- Full control over UI
+- Custom components
+
+**When to Use:**
+- Custom page layout not covered by standard floorplans.
+- Need to integrate custom components.
+- Specific requirements not met by standard floorplans.
+
+**Do Not Use If:**
+- Standard floorplans can meet your requirements.
+- You want maximum framework support and consistency.
+
+---
+
+## Flexible Column Layout (FCL)
+
+The Flexible Column Layout (FCL) is a **layout pattern**, not a floorplan. It allows displaying up to three pages side by side, enabling master-detail and master-detail-detail patterns.
+
+### Column Configurations
+
+| Layout | Description | Use Case |
+|--------|-------------|----------|
+| **One Column** | Full screen, single page | Simple navigation |
+| **Two Columns** | List + Detail (67/33 or 33/67) | Master-detail |
+| **Three Columns** | List + Detail + Sub-detail | Master-detail-detail |
+| **Mid Expanded** | Middle column expanded | Focus on detail |
+| **End Expanded** | Right column expanded | Focus on sub-detail |
+
+### Visual Representation
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ ONE COLUMN (Full Screen)                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │                                                     │ │
+│ │              List Report                            │ │
+│ │                                                     │ │
+│ └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ TWO COLUMNS (Master-Detail)                             │
+│ ┌──────────────────────┐ ┌────────────────────────────┐ │
+│ │                      │ │                            │ │
+│ │   List Report        │ │     Object Page            │ │
+│ │   (Master)           │ │     (Detail)               │ │
+│ │                      │ │                            │ │
+│ └──────────────────────┘ └────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ THREE COLUMNS (Master-Detail-Detail)                    │
+│ ┌────────────┐ ┌────────────────┐ ┌───────────────────┐ │
+│ │            │ │                │ │                   │ │
+│ │ List       │ │ Object         │ │ Sub-Object        │ │
+│ │ Report     │ │ Page           │ │ Page              │ │
+│ │            │ │                │ │                   │ │
+│ └────────────┘ └────────────────┘ └───────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+```
+
+### When to Use FCL
+
+**Use FCL When:**
+- Users frequently switch between list and detail views.
+- Context of the list is important while viewing details.
+- Users need to compare items quickly.
+- Master-detail relationship is central to the workflow.
+- Screen real estate allows side-by-side viewing.
+
+**Use Full Screen Navigation When:**
+- Details require full attention.
+- Complex object pages with many sections.
+- Mobile-first design requirement.
+- Users don't need to see list while editing.
+- Simple create/edit/display workflow.
+
+### FCL Configuration in manifest.json
+
 ```json
 {
-  "cds": {
-    "auth": {
-      "[development]": {
-        "kind": "mocked",
-        "users": {
-          "customer": { "password": "customer", "roles": ["authenticated-user"] },
-          "admin": { "password": "admin", "roles": ["authenticated-user", "admin"] }
+  "sap.ui5": {
+    "routing": {
+      "config": {
+        "flexibleColumnLayout": {
+          "defaultTwoColumnLayoutType": "TwoColumnsMidExpanded",
+          "defaultThreeColumnLayoutType": "ThreeColumnsMidExpanded"
+        }
+      },
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "TravelList",
+          "target": "TravelList"
+        },
+        {
+          "pattern": "Travel({key}):?query:",
+          "name": "TravelDetail",
+          "target": ["TravelList", "TravelDetail"]
+        },
+        {
+          "pattern": "Travel({key})/Booking({key2}):?query:",
+          "name": "BookingDetail",
+          "target": ["TravelList", "TravelDetail", "BookingDetail"]
+        }
+      ],
+      "targets": {
+        "TravelList": {
+          "type": "Component",
+          "id": "TravelList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/Travel",
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "TravelDetail": {
+          "type": "Component",
+          "id": "TravelDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/Travel"
+            }
+          }
+        },
+        "BookingDetail": {
+          "type": "Component",
+          "id": "BookingDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/Travel/to_Booking"
+            }
+          }
         }
       }
     }
@@ -46,912 +489,262 @@ cds init .  # or: cds init my-project && cd my-project
 }
 ```
 
-**Then add models:**
-1. `db/schema.cds` — domain entities
-2. `db/data/*.csv` — seed data
-3. `srv/*-service.cds` — service definitions
-4. `srv/*-service.js` — handlers
-5. `srv/access-control.cds` — authorization
-```bash
-npm install
-cds watch  # Test at http://localhost:4004
+---
+
+## Common Floorplan Combinations
+
+### Pattern 1: Standard Business Object
+
 ```
+List Report → Object Page
+```
+
+**Use Case:** Browse orders, view/edit order details
+**Example:** Sales Orders, Purchase Orders, Products
+
+### Pattern 2: Master-Detail-Detail
+
+```
+List Report → Object Page → Sub-Object Page
+```
+
+**Use Case:** Hierarchical data with compositions
+**Example:** Travel → Bookings → Booking Supplements
+
+### Pattern 3: Analytics to Transaction
+
+```
+Analytical List Page → Object Page
+```
+
+**Use Case:** Analyze KPIs, then act on specific items
+**Example:** Sales Analysis → Sales Order
+
+### Pattern 4: Role-Based Dashboard
+
+```
+Overview Page → List Report → Object Page
+                    ↓
+              Object Page
+```
+
+**Use Case:** Role dashboard with quick access to multiple apps
+**Example:** Manager Dashboard → Team Tasks → Task Details
+
+### Pattern 5: Guided Creation
+
+```
+List Report → Wizard → Object Page (View created item)
+```
+
+**Use Case:** Complex object creation requiring guidance
+**Example:** Contract Creation, Configuration Wizard
+
+### Pattern 6: Work Processing
+
+```
+Worklist → Object Page → Back to Worklist
+```
+
+**Use Case:** Process work items sequentially
+**Example:** Approval Workflow, Task Processing
+
+### Pattern 7: Quick Find
+
+```
+Initial Page → Object Page
+```
+
+**Use Case:** Find specific item by known ID
+**Example:** Warehouse scanning, Direct item lookup
 
 ---
 
-## Domain Modelling
+## Responsive Behavior
 
-### KISS Over Abstraction
+### Desktop (>1440px)
 
-❌ **Over-engineered:**
-```cds
-type Money { amount: Decimal; currency: Currency; }
-entity Books { price: Money; totalprice: Money; }  // Currency matching burden
-```
+| Floorplan | Behavior |
+|-----------|----------|
+| List Report | Full filter bar, responsive table |
+| Object Page | All sections visible, anchor navigation |
+| ALP | Full visual filters, hybrid view |
+| FCL | Up to 3 columns |
 
-✅ **Simple:**
-```cds
-entity Books : managed {
-  stock: Integer;
-  price: Decimal;
-  currency: Currency;  // One currency for all
-}
-```
+### Tablet (600-1440px)
 
-### Avoid foo:Foo Anti-Pattern
+| Floorplan | Behavior |
+|-----------|----------|
+| List Report | Condensed filter bar, responsive table |
+| Object Page | Anchor navigation, sections stack |
+| ALP | Visual filters collapse, hybrid view |
+| FCL | Up to 2 columns |
 
-❌ `type Stock : Integer; entity Books { stock : Stock; }`
-✅ `entity Books { stock : Integer; }`
+### Mobile (<600px)
 
-**Exception:** Use named types when reuse ratio is high.
+| Floorplan | Behavior |
+|-----------|----------|
+| List Report | Filter dialog, list-style table |
+| Object Page | Tab navigation, sections as pages |
+| ALP | Limited functionality, consider List Report |
+| FCL | Single column only (full screen) |
 
-### Use @sap/cds/common
-```cds
-using { managed, cuid, Country } from '@sap/cds/common';
+### Mobile Considerations
 
-entity Books : cuid, managed {
-  title: localized String;
-  author: Association to Authors;
-}
-```
-
----
-
-## Separation of Concerns
-
-### Extend Aspects Anywhere
-```cds
-// Extend managed to add change history
-extend managed with {
-  changes: Composition of many {
-    key timestamp: DateTime;
-    author: String;
-    comment: String;
-  };
-}
-```
-
-### Separate Files
-```cds
-// srv/travel-service.cds
-service TravelService { entity Travel as projection on my.Travel; }
-
-// srv/access-control.cds
-using { TravelService } from './travel-service';
-annotate TravelService.Travel with @(restrict: [
-  { grant: 'READ', to: 'authenticated-user' }
-]);
-
-// srv/labels.cds
-annotate TravelService.Travel { BookingFee @title: '{i18n>BookingFee}'; }
-```
-
-### Empty Aspects for Reusable ACL
-```cds
-aspect ACL4Travels @(restrict: [
-  { grant: 'READ', to: 'authenticated-user' }
-]) {}
-extend TravelService.Travel with ACL4Travels;
-```
+- **List Report** works well on mobile
+- **Object Page** adapts with tab navigation
+- **ALP** has limited mobile support — consider List Report alternative
+- **Overview Page** cards stack vertically
+- **FCL** degrades to full screen navigation
+- **Worklist** works well for mobile task processing
 
 ---
 
-## Services
+## Performance Considerations
 
-### Services as Facades (Not 1:1)
+### Large Data Sets (>10,000 records)
 
-❌ **Don't:** Single mega-service exposing all entities 1:1
+| Floorplan | Recommendation |
+|-----------|----------------|
+| List Report | ✅ Excellent — pagination, lazy loading |
+| ALP | ⚠️ Consider aggregation, limit visual filters |
+| Worklist | ⚠️ Consider filtering to reduce set |
+| Object Page | ✅ Good — single object focus |
+| Overview Page | ✅ Good — cards limit data per view |
 
-✅ **Do:** Use-case focused services with denormalized views
-```cds
-service CatalogService {
-  @readonly entity ListOfBooks as projection on Books {
-    ID, title, author.name as author  // Flattened
-  }
-}
+### Complex Objects (Many Fields/Associations)
 
-service AdminService @(requires: 'admin') {
-  entity Books as projection on db.Books;
-}
-```
+| Floorplan | Recommendation |
+|-----------|----------------|
+| Object Page | ✅ Use sections, lazy load tabs |
+| List Report | ⚠️ Limit visible columns, use expandable |
+| FCL | ⚠️ May cause performance issues with complex pages |
 
-### Projections
-```cds
-@readonly entity Books as projection on my.Books { *,
-  author.name as author
-} excluding { createdBy, modifiedBy };
+### Real-time Data
 
-entity P_Authors as projection on Authors {
-  *, books[stock > 0] as availableBooks
-};
-```
-
----
-
-## Custom Actions and Functions
-
-### Declaration
-```cds
-service BookshopService {
-  // Unbound
-  action submitOrder(book: Books:ID, quantity: Integer) returns { status: String; };
-  function getStatistics() returns { totalBooks: Integer; };
-
-  // Bound
-  entity Orders actions {
-    action cancel();
-    function getInvoice() returns LargeBinary;
-  };
-}
-```
-
-### Deep POST vs Custom Actions
-
-**Use Deep POST when:**
-- Simple nested creation, no validation
-- Standard CRUD, client controls IDs
-- Auto-save drafts
-
-**Use Custom Action when:**
-- Auto-generate IDs (RMA numbers, invoice numbers)
-- Complex business rules (inventory, pricing)
-- Explicit transaction control
-- Emit events or call external services
-```cds
-// Custom action for complex logic
-entity RMAs actions {
-  action submitRMA(items: array of {...}) returns { ID: UUID; rmaNumber: String; };
-}
-```
-
-### Auto-Generated Fields (NOT NULL)
-
-❌ **Wrong — generates after INSERT:**
-```javascript
-this.after('CREATE', RMAs, async (data) => {
-  // Too late! INSERT already failed
-  await UPDATE(RMAs, data.ID).with({ rmaNumber });
-});
-```
-
-✅ **Correct — generate before INSERT:**
-```javascript
-this.before('CREATE', RMAs, async (req) => {
-  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const seq = Math.floor(Math.random() * 99999).toString().padStart(5, '0');
-  req.data.rmaNumber = `RMA-${dateStr}-${seq}`;
-});
-```
-
-### Handler Implementation
-```javascript
-const cds = require('@sap/cds');
-
-module.exports = class BookshopService extends cds.ApplicationService {
-  init() {
-    const { Books, Orders } = this.entities;
-
-    // Unbound action
-    this.on('submitOrder', async (req) => {
-      const { book, quantity } = req.data;
-      const bookData = await SELECT.one.from(Books, book);
-      if (!bookData) return req.reject(404, `Book ${book} not found`);
-      if (bookData.stock < quantity) return req.reject(409, 'Insufficient stock');
-
-      const orderID = cds.utils.uuid();
-      await INSERT.into(Orders).entries({ ID: orderID, book_ID: book, quantity });
-      await UPDATE(Books, book).with({ stock: { '-=': quantity } });
-      return { status: 'confirmed', orderID };
-    });
-
-    // Bound action
-    this.on('cancel', Orders, async (req) => {
-      const { ID } = req.params[0];
-      await UPDATE(Orders, ID).with({ status: 'cancelled' });
-    });
-
-    return super.init();
-  }
-}
-```
-
-### Status-Changing Actions (Best Pattern)
-
-**Pattern for state machine actions that change status:**
-
-```javascript
-module.exports = class InvoiceService extends cds.ApplicationService {
-  init() {
-    const { Invoices } = this.entities;
-
-    /**
-     * Action: postInvoice
-     * Transition: PARKED → POSTED
-     * Returns updated entity for UI refresh
-     */
-    this.on('postInvoice', async (req) => {
-      const { params: invoices } = req;
-      const { ID } = invoices.pop();
-
-      // Validate current state
-      const invoice = await SELECT.one.from(Invoices, ID);
-      if (!invoice) return req.reject(404, 'Invoice not found');
-      if (invoice.status_code !== 'PARKED') {
-        return req.reject(409, `Can only post PARKED invoices. Current: ${invoice.status_code}`);
-      }
-
-      // Update status
-      await UPDATE(Invoices, ID).set({ status_code: 'POSTED' });
-
-      // Return updated entity (triggers UI refresh via SideEffects)
-      return await SELECT.one(Invoices).where({ ID });
-    });
-
-    /**
-     * Action: revertPosting
-     * Transition: POSTED → PARKED
-     * Returns updated entity for UI refresh
-     */
-    this.on('revertPosting', async (req) => {
-      const { params: invoices } = req;
-      const { ID } = invoices.pop();
-
-      // Validate current state
-      const invoice = await SELECT.one.from(Invoices, ID);
-      if (!invoice) return req.reject(404, 'Invoice not found');
-      if (invoice.status_code !== 'POSTED') {
-        return req.reject(409, `Can only revert POSTED invoices. Current: ${invoice.status_code}`);
-      }
-
-      // Update status
-      await UPDATE(Invoices, ID).set({ status_code: 'PARKED' });
-
-      // Return updated entity (triggers UI refresh via SideEffects)
-      return await SELECT.one(Invoices).where({ ID });
-    });
-
-    return super.init();
-  }
-}
-```
-
-**Key Points:**
-- ✅ Extract ID from `req.params[0]` for bound actions
-- ✅ Always validate current status before changing
-- ✅ Return updated entity to trigger UI refresh
-- ✅ Use descriptive rejection messages with current state
-- ✅ Pair with `@Common.SideEffects` annotation to refresh UI automatically
+| Floorplan | Recommendation |
+|-----------|----------------|
+| ALP | ✅ Good for KPI monitoring |
+| Overview Page | ✅ Cards can auto-refresh |
+| Worklist | ✅ Good for task queues |
+| List Report | ⚠️ Manual refresh typically needed |
 
 ---
 
-## CQL Query Patterns
+## Launchpad Integration
 
-### Path Expressions & Nested Projections
-```javascript
-// Path expression (forward join)
-await cds.ql `SELECT ID, title, author.name as author from Books`
+### Tile Types
 
-// Nested projection (normalized)
-await cds.ql `SELECT from Authors { ID, name, books { title } }`
-// Returns: [{ ID: 150, name: 'Poe', books: [{ title: 'The Raven' }] }]
+| Tile Type | Use Case | Target |
+|-----------|----------|--------|
+| Static | Fixed info, app launch | Any floorplan |
+| Dynamic | Live count/KPI | List Report, Worklist |
+| KPI | Real-time metrics | ALP, Overview Page |
+| News | Notifications | Any floorplan |
 
-// Infix filters
-await cds.ql `SELECT from Authors {
-  ID, name, books[ID > 251] { ID, title }
-} WHERE ID >= 150`
+### Intent Navigation
 
-// Path in FROM (use colon)
-await cds.ql `SELECT FROM Authors:books { ID, title }`
-
-// Query as relvar (view)
-const worksOfPoe = cds.ql `SELECT FROM Books WHERE author.name like '%Poe'`
-await SELECT.from(worksOfPoe).where(`title like 'The %'`)
+```
+SemanticObject-Action
 ```
 
-### Advanced Patterns
-```javascript
-// Expand associations
-const books = await SELECT.from(Books).columns(b => {
-  b.ID, b.title,
-  b.author(a => { a.ID, a.name }),
-  b.reviews(r => { r.rating, r.comment })
-});
+**Examples:**
+- `SalesOrder-display` → Object Page
+- `SalesOrder-manage` → List Report
+- `SalesOrder-analyze` → Analytical List Page
+- `SalesOrder-create` → Wizard or Object Page
 
-// Aggregations
-const stats = await SELECT.from(Books).columns(
-  'author_ID',
-  { count: { args: ['*'], as: 'bookCount' } }
-).groupBy('author_ID');
+### Cross-App Navigation Configuration
 
-// Subqueries
-const prolific = await SELECT.from(Authors).where(
-  `ID in`, SELECT('author_ID').from(Books).groupBy('author_ID').having('count(*) > 5')
-);
-```
-
----
-
-## Event Handling
-
-### Handler Phases
-```javascript
-module.exports = class CatalogService extends cds.ApplicationService {
-  init() {
-    const { Books } = this.entities;
-
-    // BEFORE: Validation (parallel)
-    this.before('CREATE', Books, async (req) => {
-      if (!req.data.title) req.error(400, 'Title required');
-    });
-
-    // ON: Core logic (sequential interceptor)
-    this.on('READ', Books, async (req, next) => {
-      const result = await next();
-      return result;
-    });
-
-    // AFTER: Enrichment (parallel)
-    this.after('READ', Books, (books) => {
-      books.forEach(b => b.eligible = b.stock > 100);
-    });
-
-    return super.init();
-  }
-}
-```
-
-### Generic Handlers
-```javascript
-this.before('READ', '*', ...)     // All READ requests
-this.before('*', 'Books', ...)    // All requests to Books
-this.before('*', ...)             // All requests
-```
-
-### Emitting Events
-```javascript
-await this.emit('BookOrdered', { book: 201, quantity: 1 });  // Async event
-await cats.send('SubmitOrder', { book: 201 });               // Sync request
-```
-
----
-
-## Error Handling
-
-### req.error vs req.reject
-```javascript
-// Collects errors, continues execution
-this.before('CREATE', Books, (req) => {
-  if (!req.data.title) req.error(400, 'Title required', 'title');
-  if (!req.data.author_ID) req.error(400, 'Author required', 'author_ID');
-  // All errors returned together
-});
-
-// Throws immediately, stops execution
-this.before('DELETE', Books, async (req) => {
-  const book = await SELECT.one.from(Books, req.data.ID);
-  if (book.stock > 0) req.reject(403, 'Cannot delete book with stock');
-});
-```
-
-### HTTP Status Codes
-
-| Code | Use |
-|------|-----|
-| 400 | Validation error |
-| 401 | Not authenticated |
-| 403 | Forbidden |
-| 404 | Not found |
-| 409 | Conflict |
-| 422 | Unprocessable |
-
-### Transactions
-```javascript
-this.on('complexOperation', async (req) => {
-  const tx = cds.tx(req);
-  try {
-    await tx.run(INSERT.into(Orders).entries({ ... }));
-    await tx.run(UPDATE(Books).with({ ... }));
-    // Auto-commits on success
-  } catch (err) {
-    // Auto-rolls back
-    req.reject(500, 'Operation failed');
-  }
-});
-```
-
----
-
-## Draft Handling
-
-### Enable Drafts
-```cds
-@odata.draft.enabled
-entity Books as projection on db.Books;
-```
-
-### Lifecycle Events
-```javascript
-this.before('NEW', Books.drafts, async (req) => {
-  req.data.status = 'draft';  // Defaults for new draft
-});
-
-this.before('PATCH', Books.drafts, async (req) => {
-  if (req.data.price < 0) req.error(400, 'Price must be positive');
-});
-
-this.before('SAVE', Books, async (req) => {
-  if (!req.data.title) req.error(400, 'Title required for activation');
-});
-
-this.after('SAVE', Books, async (data) => {
-  await this.emit('BookPublished', { book: data.ID });
-});
-```
-
-### Draft Calculations for Composite Entities
-
-**Pattern:** Parent entities with composition children (e.g., Orders with Items, RMAs with RMAItems) often need to recalculate parent totals when child items change.
-
-**Key Issue:** During draft mode, items are in `RMAItems.drafts` but handlers may query from the active `RMAItems` table, causing calculations to fail.
-
-**Solution:** Create a helper function that accepts an `isDraft` parameter to handle both cases:
-
-```javascript
-// Helper that works for both active and draft modes
-const calculateParentTotal = async (parentId, isDraft = false) => {
-  const itemsEntity = isDraft ? RMAItems.drafts : RMAItems;
-  const parentEntity = isDraft ? RMAs.drafts : RMAs;
-
-  const items = await SELECT.from(itemsEntity).where({ rma_ID: parentId });
-  const total = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
-  await UPDATE(parentEntity, parentId).with({ totalAmount: total });
-};
-
-// Add handlers for BOTH draft and active modes
-this.before('CREATE', RMAItems.drafts, async (req) => {
-  if (req.data.quantity && req.data.unitPrice) {
-    req.data.totalPrice = req.data.quantity * req.data.unitPrice;
-  }
-});
-
-this.after('CREATE', RMAItems.drafts, async (data) => {
-  if (data && data.rma_ID) {
-    await calculateParentTotal(data.rma_ID, true);  // ← isDraft=true
-  }
-});
-
-this.after('PATCH', RMAItems.drafts, async (data) => {
-  if (data && data.rma_ID) {
-    await calculateParentTotal(data.rma_ID, true);  // ← isDraft=true
-  }
-});
-
-this.after('DELETE', RMAItems.drafts, async (data) => {
-  if (data && data.rma_ID) {
-    await calculateParentTotal(data.rma_ID, true);  // ← isDraft=true
-  }
-});
-
-// Also add handlers for active mode (after SAVE/activation)
-this.after(['CREATE', 'UPDATE'], RMAItems, async (data) => {
-  if (data && data.rma_ID) {
-    await calculateParentTotal(data.rma_ID, false);  // ← isDraft=false
-  }
-});
-```
-
-**Best Practices:**
-- Always provide draft handlers (`RMAItems.drafts`) in addition to active handlers (`RMAItems`)
-- Use a helper function with `isDraft` parameter to avoid duplication
-- Handle CREATE, PATCH, and DELETE operations
-- Test with actual draft workflows (creating parent, adding children, saving)
-
----
-
-## Media Handling
-
-### Define Media Entities
-```cds
-entity Attachments : cuid, managed {
-  @Core.MediaType: mediaType
-  @Core.ContentDisposition.Filename: filename
-  content: LargeBinary;
-  
-  @Core.IsMediaType
-  mediaType: String;
-  filename: String;
-  size: Integer;
-}
-```
-
-### Handle Upload/Download
-```javascript
-this.before('PUT', Attachments, async (req) => {
-  const allowedTypes = ['application/pdf', 'image/png'];
-  if (!allowedTypes.includes(req.headers['content-type'])) {
-    return req.reject(415, 'Unsupported media type');
-  }
-});
-
-this.on('READ', Attachments, async (req, next) => {
-  if (!req._.req.path.endsWith('$value')) return next();
-  const { ID } = req.params[0];
-  const attachment = await SELECT.one.from(Attachments, ID);
-  return req.reply(attachment.content);
-});
-```
-
-### Use Plugin (Production)
-```bash
-npm add @cap-js/attachments
-```
-```cds
-using { Attachments } from '@cap-js/attachments';
-entity Documents { attachments: Composition of many Attachments; }
-```
-
----
-
-## Remote Services
-
-### Import & Configure
-```bash
-cds import https://api.sap.com/api/API_BUSINESS_PARTNER/overview --as API_BUSINESS_PARTNER
-```
 ```json
 {
-  "cds": {
-    "requires": {
-      "API_BUSINESS_PARTNER": {
-        "kind": "odata-v2",
-        "model": "srv/external/API_BUSINESS_PARTNER",
-        "[production]": {
-          "credentials": { "destination": "S4HANA_CLOUD" }
+  "sap.app": {
+    "crossNavigation": {
+      "inbounds": {
+        "SalesOrder-manage": {
+          "semanticObject": "SalesOrder",
+          "action": "manage",
+          "title": "Manage Sales Orders",
+          "signature": {
+            "parameters": {
+              "SalesOrderID": { "required": false }
+            }
+          }
         }
       }
     }
   }
 }
 ```
-
-### Consume
-```javascript
-const S4 = await cds.connect.to('API_BUSINESS_PARTNER');
-
-this.on('READ', 'BusinessPartners', async (req) => {
-  return S4.run(req.query);
-});
-```
-
-### Mock
-```javascript
-// srv/external/API_BUSINESS_PARTNER-mock.js
-module.exports = class MockBusinessPartner extends cds.Service {
-  async init() {
-    this.on('READ', 'A_BusinessPartner', () => [
-      { BusinessPartner: '1000000', BusinessPartnerFullName: 'Test' }
-    ]);
-    return super.init();
-  }
-}
-```
-
----
-
-## Testing
-
-### Basic Tests
-```javascript
-const cds = require('@sap/cds/lib');
-const { GET, POST, expect } = cds.test(__dirname + '/..');
-
-describe('CatalogService', () => {
-  it('GET /catalog/Books', async () => {
-    const { status, data } = await GET('/catalog/Books');
-    expect(status).to.equal(200);
-    expect(data.value).to.be.an('array');
-  });
-
-  it('POST with auth', async () => {
-    const { status } = await POST('/admin/Books', {
-      ID: 999, title: 'Test'
-    }, { auth: { username: 'admin' } });
-    expect(status).to.equal(201);
-  });
-});
-```
-
----
-
-## Authentication (Development)
-
-### Mocked Auth
-```json
-{
-  "cds": {
-    "requires": {
-      "auth": {
-        "kind": "mocked",
-        "users": {
-          "alice": { "roles": ["Admin"] },
-          "bob": { "roles": ["Manager"] },
-          "*": true
-        }
-      }
-    }
-  }
-}
-```
-
-### Enforce Auth on Service
-```cds
-service TimeTrackingService @(requires: 'authenticated-user') {
-  entity Projects as projection on db.Projects;
-}
-```
-
-### Authorization Patterns
-```cds
-// Service-level
-service AdminService @(requires: 'admin') { ... }
-
-// Entity-level
-annotate AdminService.Books with @restrict: [
-  { grant: 'READ', to: 'authenticated-user' },
-  { grant: 'WRITE', to: 'admin' },
-  { grant: 'DELETE', to: 'admin', where: 'stock = 0' }
-];
-
-// Field-level
-annotate AdminService.Books with {
-  costPrice @(restrict: [{ to: 'admin' }]);
-};
-```
-
----
-
-## Multitenancy & Data Isolation
-
-### Enable Multitenancy
-```json
-{
-  "cds": { "requires": { "multitenancy": true } }
-}
-```
-
-### Tenant Isolation (Automatic)
-```javascript
-this.on('READ', 'Customers', async (req) => {
-  // CAP auto-filters by req.user.tenant
-  return await SELECT.from('Customers');  // Only current tenant's data
-});
-```
-
-### Access Tenant Info
-```javascript
-const tenantId = req.user.tenant;
-const userId = req.user.id;
-```
-
----
-
-## BTP Users & Business Entities
-
-### Pattern 1: Employee with BTP User (1:1)
-```cds
-entity Employees : cuid, managed {
-  btpUserId: String(256) @mandatory;  // BTP email/ID
-  employeeNumber: String(20);
-  firstName: String(100);
-  // ...
-}
-
-@assert.unique: { btpUserId: [btpUserId] }
-annotate Employees with {};
-```
-```javascript
-this.before('CREATE', 'TimeEntries', async (req) => {
-  const employee = await SELECT.one.from(Employees)
-    .where({ btpUserId: req.user.id });
-  if (!employee) return req.reject(403, 'No employee profile found');
-  req.data.employee_ID = employee.ID;
-});
-```
-
-### Pattern 2: Customer with Multiple Users (1:N)
-```cds
-entity Customers : cuid, managed {
-  name: String(200);
-  users: Composition of many CustomerUsers on users.customer = $self;
-}
-
-entity CustomerUsers : cuid, managed {
-  customer: Association to Customers @mandatory;
-  btpUserId: String(256) @mandatory;
-  role: String(50) default 'viewer';
-}
-
-@assert.unique: { btpUser: [btpUserId] }
-annotate CustomerUsers with {};
-```
-```javascript
-this.getCustomerForUser = async (userId) => {
-  const user = await SELECT.one.from(CustomerUsers)
-    .where({ btpUserId: userId, isActive: true });
-  return user ? { customerId: user.customer_ID, role: user.role } : null;
-};
-
-this.on('READ', Orders, async (req, next) => {
-  const context = await this.getCustomerForUser(req.user.id);
-  if (!context) return req.reject(403, 'No customer profile');
-  req.query.where({ customer_ID: context.customerId });
-  return next();
-});
-```
-
----
-
-## Localization
-
-### Use `localized` Modifier
-```cds
-entity ReturnReasons : cuid {
-  code: String(20) not null;                 // NOT localized
-  name: localized String(100) not null;      // Localized
-  description: localized String(500);
-}
-```
-
-### CSV Files
-
-**Base (English):**
-```csv
-db/data/app-ReturnReasons.csv
-ID;code;name;description
-1;DEFECTIVE;Defective;Product is defective
-```
-
-**Translations (_texts suffix):**
-```csv
-db/data/app-ReturnReasons_texts.csv
-ID;locale;name;description
-1;de;Defekt;Produkt ist defekt
-1;fr;Défectueux;Le produit est défectueux
-1;pl;Uszkodzony;Produkt jest uszkodzony
-```
-
-CAP returns translations based on `Accept-Language` header automatically.
-
----
-
-## Initial Data Loading
-
-### Convention: `<namespace>-<EntityName>.csv`
-```
-db/data/time_tracking-Employees.csv
-db/data/time_tracking-Projects.csv
-```
-
-**CSV Structure:**
-- Header row required (exact element names)
-- `managed` fields auto-populated
-- UUIDs for `cuid` keys
-- Associations via foreign keys (`manager_ID`)
-- Dates: ISO 8601 format
-- Booleans: `true`/`false`
-
-**Load order:** Parents before children
-
----
-
-## Inline Table Editing (Fiori)
-
-### Use FK Field, Not Association
-
-❌ **Wrong:**
-```cds
-annotate Service.RMAItems with @UI.LineItem: [
-  { Value: reason }  // Association, not editable
-];
-```
-
-✅ **Correct:**
-```cds
-annotate Service.RMAItems with @UI.LineItem: [
-  { Value: reason_ID }  // FK field, editable
-];
-
-reason @Common: {
-  ValueList: {
-    CollectionPath: 'ReturnReasons',
-    Parameters: [
-      {
-        $Type: 'Common.ValueListParameterInOut',
-        LocalDataProperty: reason_ID,
-        ValueListProperty: 'ID'
-      }
-    ]
-  },
-  Text: reason.name,
-  TextArrangement: #TextOnly
-};
-```
-
----
-
-## Anti-Patterns
-
-| ❌ Don't | ✅ Do |
-|---------|------|
-| Manual package.json | `cds init` always |
-| Single mega-service | Use-case focused services |
-| Premature microservices | Start monolithic, split late |
-| Over-engineered types | Flat structures, built-in types |
-| Manual FKs | Use associations |
-| Hardcoded credentials | Destinations + profiles |
-| Trust client customer ID | Derive from req.user |
-| Assume 1 user = 1 customer | Use junction table |
-| Localize code fields | Only localize display names |
 
 ---
 
 ## Quick Reference
 
-### CQL
+### Floorplan Selection Summary
 
-| Task | Pattern |
-|------|---------|
-| Read | `SELECT.from(Books)` |
-| Filter | `.where({ stock: { '>': 0 } })` |
-| Columns | `.columns('ID', 'title')` |
-| Expand to-one | `.columns(b => { b.*, b.author('*') })` |
-| Insert | `INSERT.into(Books).entries({ ... })` |
-| Update | `UPDATE(Books, 201).with({ stock: 10 })` |
-| Delete | `DELETE.from(Books).where({ ID: 201 })` |
+| Floorplan | Primary Purpose | Data Volume | Edit Capability |
+|-----------|----------------|-------------|-----------------|
+| List Report | Browse, filter, act | Large | Limited (inline) |
+| Object Page | View/edit single item | Single | Full |
+| ALP | Analyze, drill down | Large | Limited |
+| Worklist | Process tasks | Medium | Via navigation |
+| Overview Page | Role dashboard | Multiple sources | Via navigation |
+| Wizard | Guided creation | New object | Full (sequential) |
+| Initial Page | Quick find | Single | Via navigation |
+| Dynamic Page | Simple content | Varies | Varies |
+| Custom Page | Special needs | Varies | Varies |
 
-### Handlers
+### FCL vs Full Screen
 
-| Pattern | Description |
-|---------|-------------|
-| `this.before('*', ...)` | All operations |
-| `this.on('READ', 'Books', ...)` | READ on Books |
-| `this.after('CREATE', '*', ...)` | After CREATE on any |
+| Criterion | FCL | Full Screen |
+|-----------|-----|-------------|
+| Context preservation | ✅ | ❌ |
+| Screen real estate | ❌ | ✅ |
+| Mobile support | Limited | ✅ |
+| Quick comparison | ✅ | ❌ |
+| Complex editing | ❌ | ✅ |
+| Performance | ⚠️ | ✅ |
+
+### Common Mistakes to Avoid
+
+| Mistake | Better Approach |
+|---------|-----------------|
+| Using ALP for simple lists | Use List Report |
+| Object Page with one section | Use Dynamic Page |
+| Wizard for familiar tasks | Use Object Page create mode |
+| Overview Page with <3 cards | Use Object Page or List Report |
+| FCL on complex object pages | Use full screen |
+| List Report for work items | Use Worklist |
 
 ---
 
 ## Validation Checklist
 
-- [ ] `cds init` used (not manual package.json)
-- [ ] Namespace declared
-- [ ] `using` imports
-- [ ] Managed aspects applied
-- [ ] Authorization annotations
-- [ ] Associations (not FKs)
-- [ ] Named handler functions
-- [ ] `req.error()`/`req.reject()` properly used
-- [ ] `async`/`await` everywhere
-- [ ] `return super.init()`
-- [ ] Separated concerns (auth, labels in own files)
-- [ ] Test coverage
+Before finalizing floorplan selection:
 
-**For SaaS:**
-- [ ] `btpUserId` on User/Employee entities
-- [ ] Junction table for user-customer (1:N)
-- [ ] Customer isolation handlers
-- [ ] `localized` on user-facing text
-- [ ] Translation CSV files
+- [ ] Identified primary user task
+- [ ] Considered data volume and performance
+- [ ] Evaluated mobile requirements
+- [ ] Planned navigation flow between floorplans
+- [ ] Decided FCL vs full screen
+- [ ] Considered analytics requirements
+- [ ] Reviewed responsive behavior needs
+- [ ] Planned Launchpad tile type
+- [ ] Defined semantic object and actions
+- [ ] Validated combination with related apps
 
 ---
 
 ## Key Reminders
 
-1. **Always `cds init`** — version alignment is critical
-2. **Models fuel runtimes** — minimize custom code
-3. **Services are stateless** — state lives in DB
-4. **Data is passive** — plain JS objects
-5. **Everything is extensible** — aspects extend anywhere
-6. **Grow as you go** — start simple
-7. **Let CAP do the work** — avoid reimplementation
-8. **Link BTP users** — store btpUserId
-9. **Tenant isolation automatic** — customer isolation manual
-10. **Localize display** — keep codes language-independent
+1. **Start with user task** — What does the user need to accomplish?
+2. **Consider data volume** — Large datasets need List Report or ALP
+3. **Think responsive** — Mobile behavior varies significantly
+4. **Plan navigation** — How do floorplans connect?
+5. **FCL is optional** — Full screen is often simpler and better
+6. **Don't over-engineer** — Use simplest floorplan that meets needs
+7. **Analytics need ALP** — List Report charts are for visualization only
+8. **Worklist for tasks** — Not just any list of items
+9. **Overview Page needs cards** — At least 3, different types
+10. **Wizard has limits** — 3-8 steps, not for daily tasks
