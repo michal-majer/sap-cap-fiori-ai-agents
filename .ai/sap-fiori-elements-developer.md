@@ -132,6 +132,99 @@ annotate TravelService.Travel with @UI: { ... };
 
 ---
 
+## Manifest.json Configuration
+
+### CRITICAL: Routing Patterns for List Report Object Page
+
+**Common Issue:** Navigation to Object Page fails when the route pattern is missing the entity set name.
+
+**✅ CORRECT Pattern:**
+```json
+{
+  "sap.ui5": {
+    "routing": {
+      "config": {
+        "routerClass": "sap.f.routing.Router"
+      },
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "List",
+          "target": "List"
+        },
+        {
+          "pattern": "EntitySetName({key}):?query:",
+          "name": "ObjectPage",
+          "target": "ObjectPage"
+        }
+      ],
+      "targets": {
+        "List": {
+          "type": "Component",
+          "id": "List",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/EntitySetName",
+              "variantManagement": "Page",
+              "navigation": {
+                "EntitySetName": {
+                  "detail": {
+                    "route": "ObjectPage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ObjectPage": {
+          "type": "Component",
+          "id": "ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/EntitySetName"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**❌ WRONG Pattern:**
+```json
+{
+  "pattern": "({key}):?query:",  // ❌ Missing entity set name
+  "name": "ObjectPage",
+  "target": "ObjectPage"
+}
+```
+
+**Key Rules:**
+1. **Object Page route pattern MUST include the entity set name**: `EntitySetName({key}):?query:`
+2. **Match the contextPath**: The entity set name in the pattern must match the `contextPath` in targets
+3. **Navigation configuration**: Ensure the `navigation` object references the correct entity set and route name
+4. **Consistency**: All three places (pattern, contextPath, navigation) must use the same entity set name
+
+**Example for Complaints Entity:**
+```json
+{
+  "pattern": "Complaints({key}):?query:",  // ✅ Includes entity set name
+  "name": "ObjectPage",
+  "target": "ObjectPage"
+}
+```
+
+**Why This Matters:**
+- Fiori Elements uses the entity set name to construct proper OData URLs
+- Without it, navigation from List Report to Object Page will fail
+- The pattern determines the URL structure: `/Complaints(guid'...')`
+
+---
+
 ## Annotations Overview
 
 Annotations are used to configure and customize SAP Fiori elements applications. They provide a way to define the behavior and appearance of the application without changing the underlying code.
@@ -1487,6 +1580,161 @@ reason @Common: {
 };
 ```
 
+**🔥 CRITICAL: The Three-Layer Value Help Annotation Pattern**
+
+**ALWAYS annotate these THREE places when implementing value helps:**
+
+1. **Association field** - Defines the value help dialog/dropdown
+2. **FK field (`*_ID`)** - Displays text in filters, tables, and forms
+3. **Related entity's ID field** - Displays text after value help selection
+
+**This pattern ensures:**
+- ✅ Clean text display everywhere (no UUIDs visible to users)
+- ✅ Proper value help functionality
+- ✅ Correct filter token display
+- ✅ No `"Text Annotation for ID is not defined"` errors
+
+**Complete Three-Layer Example:**
+
+```cds
+// ============================================
+// STEP 1: Annotate the Association Field
+// ============================================
+annotate Service.Complaints with {
+  // Association field - for value help definition
+  customer @(
+    Common.Label: 'Customer',
+    Common.Text: customer.email,           // Display email instead of UUID
+    Common.TextArrangement: #TextOnly,
+    Common.ValueList: {
+      CollectionPath: 'Customers',
+      Parameters: [
+        {
+          $Type: 'Common.ValueListParameterInOut',
+          LocalDataProperty: customer_ID,   // Maps to FK field
+          ValueListProperty: 'ID'            // Maps to Customers.ID
+        },
+        {
+          $Type: 'Common.ValueListParameterDisplayOnly',
+          ValueListProperty: 'email'         // Show in value help dialog
+        }
+      ]
+    }
+  );
+
+  // ============================================
+  // STEP 2: Annotate the FK Field
+  // ============================================
+  customer_ID @(
+    UI.Hidden,                               // Hide from UI (use association instead)
+    Common.Text: customer.email,             // ✅ Critical for filter/table display
+    Common.TextArrangement: #TextOnly
+  );
+};
+
+// ============================================
+// STEP 3: Annotate the Related Entity's ID Field
+// ============================================
+annotate Service.Customers with {
+  ID @(
+    UI.Hidden,                               // Hide UUID from UI
+    Common.Text: email,                      // ✅ Critical for value help selection display
+    Common.TextArrangement: #TextOnly
+  );
+};
+```
+
+**Why All Three Layers Are Required:**
+
+| Layer | Annotation Location | Purpose | Display Location |
+|-------|---------------------|---------|------------------|
+| **1** | Association field (`customer`) | Defines value help dialog and base text display | Forms, object pages, LineItem columns |
+| **2** | FK field (`customer_ID`) | Displays text in filters and tables | Filter bar, table cells, selection variants |
+| **3** | Related entity ID (`Customers.ID`) | Displays text after value help selection | Filter tokens, selected values, breadcrumbs |
+
+**Complete Pattern for All Value Help Types:**
+
+```cds
+// For FIXED VALUE LISTS (Dropdowns - Status, Priority, Category)
+annotate Service.Entity with {
+  // Association
+  status @(
+    Common.Label: 'Status',
+    Common.Text: status.name,
+    Common.TextArrangement: #TextOnly,
+    Common.ValueListWithFixedValues: true,
+    Common.ValueList: {
+      CollectionPath: 'Statuses',
+      Parameters: [
+        { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: status_ID, ValueListProperty: 'ID' },
+        { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' }
+      ]
+    }
+  );
+
+  // FK Field
+  status_ID @(
+    UI.Hidden,
+    Common.Text: status.name,
+    Common.TextArrangement: #TextOnly
+  );
+};
+
+// Related Entity ID
+annotate Service.Statuses with {
+  ID @(
+    UI.Hidden,
+    Common.Text: name,
+    Common.TextArrangement: #TextOnly
+  );
+};
+
+// For DIALOG VALUE LISTS (Master Data - Customers, Products)
+annotate Service.Entity with {
+  // Association
+  customer @(
+    Common.Label: 'Customer',
+    Common.Text: customer.email,
+    Common.TextArrangement: #TextOnly,
+    Common.ValueList: {
+      CollectionPath: 'Customers',
+      Parameters: [
+        { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: customer_ID, ValueListProperty: 'ID' },
+        { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'email' },
+        { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'name' }
+      ]
+    }
+  );
+
+  // FK Field
+  customer_ID @(
+    UI.Hidden,
+    Common.Text: customer.email,
+    Common.TextArrangement: #TextOnly
+  );
+};
+
+// Related Entity ID
+annotate Service.Customers with {
+  ID @(
+    UI.Hidden,
+    Common.Text: email,
+    Common.TextArrangement: #TextOnly
+  );
+};
+```
+
+**Checklist for Value Helps:**
+- [ ] Association field has `Common.Text` pointing to association property (e.g., `customer.email`)
+- [ ] Association field has `Common.TextArrangement: #TextOnly`
+- [ ] Association field has proper `ValueList` definition
+- [ ] FK field (`*_ID`) is marked `UI.Hidden`
+- [ ] FK field has `Common.Text` pointing to association property
+- [ ] FK field has `Common.TextArrangement: #TextOnly`
+- [ ] Related entity's ID field is marked `UI.Hidden`
+- [ ] Related entity's ID field has `Common.Text` pointing to display property
+- [ ] Related entity's ID field has `Common.TextArrangement: #TextOnly`
+
 **Text Arrangement Options:**
 - `#TextOnly` - Display only the friendly name (clean, recommended for dropdowns)
 - `#TextFirst` - Display name first, then ID: "Defective (uuid...)"
@@ -2028,8 +2276,14 @@ export default class CustomHeaderExtend extends BaseControllerExtension {
 
 ## Validation Checklist
 
-Generated annotations should include:
+### Manifest.json Configuration
+- [ ] **Object Page route pattern includes entity set name**: `EntitySetName({key}):?query:` (NOT just `({key}):?query:`)
+- [ ] `contextPath` in List target matches entity set name: `/EntitySetName`
+- [ ] `contextPath` in Object Page target matches entity set name: `/EntitySetName`
+- [ ] Navigation configuration references correct entity set and route
+- [ ] Router class is set: `"routerClass": "sap.f.routing.Router"`
 
+### Annotations
 - [ ] `@UI.HeaderInfo` with Title and Description
 - [ ] `@UI.LineItem` with proper column order and importance
 - [ ] `@UI.SelectionFields` for filter bar
@@ -2048,15 +2302,16 @@ Generated annotations should include:
 
 ## Key Reminders
 
-1. **Labels everywhere** — Never show technical names to users
-2. **Value helps always** — Every foreign key needs a value help
-3. **Dropdown for small lists** — Use `ValueListWithFixedValues: true` for fixed/small code lists (< 15 entries) to show dropdown instead of dialog
-4. **Dialog for large lists** — Use regular `ValueList` for large master data that needs search/filtering
-5. **Text arrangements** — Show names, not codes
-6. **Criticality for status** — Use colors to convey meaning
-7. **Hide technical fields** — UUIDs and FKs should be hidden
-8. **Side effects** — Auto-refresh dependent data
-9. **Importance matters** — Control responsive column visibility
-10. **Contact cards** — Professional display for customer data
-11. **Validation** — Use ValueListForValidation for data quality
-12. **Actions visible** — Use @Core.OperationAvailable for conditional display
+1. **🔥 CRITICAL: Route patterns MUST include entity set name** — Object Page pattern must be `EntitySetName({key}):?query:` NOT `({key}):?query:`
+2. **Labels everywhere** — Never show technical names to users
+3. **Value helps always** — Every foreign key needs a value help
+4. **Dropdown for small lists** — Use `ValueListWithFixedValues: true` for fixed/small code lists (< 15 entries) to show dropdown instead of dialog
+5. **Dialog for large lists** — Use regular `ValueList` for large master data that needs search/filtering
+6. **Text arrangements** — Show names, not codes
+7. **Criticality for status** — Use colors to convey meaning
+8. **Hide technical fields** — UUIDs and FKs should be hidden
+9. **Side effects** — Auto-refresh dependent data
+10. **Importance matters** — Control responsive column visibility
+11. **Contact cards** — Professional display for customer data
+12. **Validation** — Use ValueListForValidation for data quality
+13. **Actions visible** — Use @Core.OperationAvailable for conditional display
