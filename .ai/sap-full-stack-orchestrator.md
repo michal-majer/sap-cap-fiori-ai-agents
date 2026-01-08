@@ -261,6 +261,43 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
 
 ---
 
+### Phase 8: Cloud Deployment (USE: sap-cap-deployment)
+**Goal:** Deploy to SAP BTP Cloud Foundry
+
+**Steps:**
+1. **Read the skill:** See `.ai/sap-cap-deployment.md`
+2. **Install deployment tools:**
+```bash
+   npm install -g mbt
+   cf install-plugin multiapps
+```
+3. **Add cloud configuration:**
+```bash
+   cds add mta
+   cds add xsuaa
+   cds add hana
+```
+4. **Create AppRouter** (`app/router/`):
+   - `package.json` with `@sap/approuter`
+   - `xs-app.json` with route configuration
+5. **Build MTA archive:**
+```bash
+   mbt build
+```
+6. **Deploy to BTP:**
+```bash
+   cf login -a <api-endpoint>
+   cf deploy mta_archives/<app>_1.0.0.mtar
+```
+7. **Post-deployment:**
+   - Assign role collections to users in BTP Cockpit
+   - Verify app is accessible
+   - Check service bindings with `cf services`
+
+**Output:** Application deployed and accessible on SAP BTP
+
+---
+
 ## Execution Instructions for Claude
 
 When user requests full-stack SAP development:
@@ -334,6 +371,7 @@ When user requests full-stack SAP development:
 ✅ Testing: Different users can login and see appropriate data
 ✅ Documentation: README with setup instructions
 ✅ Quality: Follows all SAP CAP best practices (December 2025)
+✅ Deployment: Application running on SAP BTP Cloud Foundry
 
 ## How to Use It
 
