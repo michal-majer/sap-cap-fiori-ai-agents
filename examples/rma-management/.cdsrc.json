@@ -1,0 +1,26 @@
+{
+  "requires": {
+    "auth": {
+      "kind": "mocked",
+      "users": {
+        "*": true,
+        "alice": {
+          "password": "welcome",
+          "roles": ["customer", "admin"]
+        },
+        "bob": {
+          "password": "welcome",
+          "roles": ["agent", "admin"]
+        },
+        "charlie": {
+          "password": "welcome",
+          "roles": ["inspector", "admin"]
+        },
+        "dana": {
+          "password": "welcome",
+          "roles": ["admin"]
+        }
+      }
+    }
+  }
+}

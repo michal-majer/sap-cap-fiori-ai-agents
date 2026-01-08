@@ -1,0 +1,28 @@
+{
+  "name": "master-data",
+  "version": "0.0.1",
+  "description": "Administrative application for managing products and customers",
+  "keywords": [
+    "ui5",
+    "openui5",
+    "sapui5"
+  ],
+  "main": "webapp/index.html",
+  "dependencies": {},
+  "devDependencies": {
+    "@ui5/cli": "^4.0.33",
+    "@sap/ux-ui5-tooling": "1",
+    "ui5-task-zipper": "^3"
+  },
+  "scripts": {
+    "start": "fiori run --open 'index.html'",
+    "build": "ui5 build --config=ui5.yaml --clean-dest --dest dist",
+    "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf"
+  },
+  "ui5": {
+    "dependencies": [
+      "@sap/ux-ui5-tooling",
+      "ui5-task-zipper"
+    ]
+  }
+}

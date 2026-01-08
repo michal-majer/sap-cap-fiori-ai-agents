@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+_out/
+gen/
+target/
+*.mtar
+mta_archives/
+
+# Database files
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+
+# CAP specific
+connection.properties
+default-*.json
+.cdsrc-private.json
+
+# Web IDE, App Studio
+.che/
+.gen/
+
+# Logs
+*.log
+*.orig
+
+# MTA
+*_mta_build_tmp
+
+# TypeScript generated types
+@cds-models/

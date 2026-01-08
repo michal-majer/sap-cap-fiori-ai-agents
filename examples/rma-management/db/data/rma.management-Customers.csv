@@ -1,0 +1,23 @@
+ID;customerNumber;companyName;contactName;email;phone;street;city;postalCode;region;country;active;createdAt;modifiedAt
+31001001-0000-4000-a000-000000000001;CUST001001;TechVision Inc;John Anderson;j.anderson@techvision.com;+1-555-0101;123 Innovation Drive;San Francisco;94105;California;US;true;;
+31001002-0000-4000-a000-000000000002;CUST001002;Global Retail Solutions;Sarah Martinez;s.martinez@globalretail.com;+1-555-0102;456 Commerce Blvd;New York;10001;New York;US;true;;
+31001003-0000-4000-a000-000000000003;CUST001003;BuildPro Construction;Michael Chen;m.chen@buildpro.com;+1-555-0103;789 Industrial Way;Chicago;60601;Illinois;US;true;;
+31001004-0000-4000-a000-000000000004;CUST001004;Fashion Forward Ltd;Emma Wilson;e.wilson@fashionforward.com;+44-20-7123-4567;10 Oxford Street;London;W1D 1BS;England;UK;true;;
+31001005-0000-4000-a000-000000000005;CUST001005;ElectroMart Chain;David Thompson;d.thompson@electromart.com;+1-555-0105;321 Retail Avenue;Los Angeles;90001;California;US;true;;
+31001006-0000-4000-a000-000000000006;CUST001006;HomeComfort Furnishings;Lisa Brown;l.brown@homecomfort.com;+1-555-0106;555 Design Plaza;Seattle;98101;Washington;US;true;;
+31001007-0000-4000-a000-000000000007;CUST001007;SportsPro Equipment;James Rodriguez;j.rodriguez@sportspro.com;+1-555-0107;777 Athletic Drive;Denver;80202;Colorado;US;true;;
+31001008-0000-4000-a000-000000000008;CUST001008;OfficeMax Supplies;Amanda Taylor;a.taylor@officemax.com;+1-555-0108;999 Business Park;Boston;02101;Massachusetts;US;true;;
+31001009-0000-4000-a000-000000000009;CUST001009;GreenTech Solutions;Robert Lee;r.lee@greentech.com;+1-555-0109;246 Eco Boulevard;Portland;97201;Oregon;US;true;;
+31001010-0000-4000-a000-000000000010;CUST001010;LuxuryLifestyle Corp;Jennifer White;j.white@luxurylife.com;+1-555-0110;135 Premium Lane;Miami;33101;Florida;US;true;;
+31001011-0000-4000-a000-000000000011;CUST001011;TechGear Distributors;Christopher Davis;c.davis@techgear.com;+1-555-0111;468 Tech Park;Austin;78701;Texas;US;true;;
+31001012-0000-4000-a000-000000000012;CUST001012;Kitchen Essentials Co;Maria Garcia;m.garcia@kitchenessentials.com;+1-555-0112;802 Culinary Way;San Diego;92101;California;US;true;;
+31001013-0000-4000-a000-000000000013;CUST001013;AutoParts Direct;Kevin Johnson;k.johnson@autopartsdirect.com;+1-555-0113;159 Motor Avenue;Detroit;48201;Michigan;US;true;;
+31001014-0000-4000-a000-000000000014;CUST001014;BeautyBar Retailers;Nicole Martinez;n.martinez@beautybar.com;+1-555-0114;753 Style Street;Atlanta;30301;Georgia;US;true;;
+31001015-0000-4000-a000-000000000015;CUST001015;BookWorld Stores;Andrew Wilson;a.wilson@bookworld.com;+1-555-0115;951 Reading Road;Philadelphia;19101;Pennsylvania;US;true;;
+31001016-0000-4000-a000-000000000016;CUST001016;PetSupply Plus;Michelle Anderson;m.anderson@petsupply.com;+1-555-0116;357 Animal Avenue;Phoenix;85001;Arizona;US;true;;
+31001017-0000-4000-a000-000000000017;CUST001017;GardenGrow Supplies;Daniel Thomas;d.thomas@gardengrow.com;+1-555-0117;159 Green Valley;Sacramento;95814;California;US;true;;
+31001018-0000-4000-a000-000000000018;CUST001018;MusicMakers Inc;Laura Jackson;l.jackson@musicmakers.com;+1-555-0118;753 Melody Lane;Nashville;37201;Tennessee;US;true;;
+31001019-0000-4000-a000-000000000019;CUST001019;ToysRus Retail;Brian Harris;b.harris@toysrus.com;+1-555-0119;852 Playtime Drive;Orlando;32801;Florida;US;true;;
+31001020-0000-4000-a000-000000000020;CUST001020;HealthFirst Medical;Susan Clark;s.clark@healthfirst.com;+1-555-0120;963 Wellness Way;Minneapolis;55401;Minnesota;US;true;;
+31001021-0000-4000-a000-000000000021;CUST001021;IndustrialTech Ltd;Mark Robinson;m.robinson@industrialtech.com;+1-555-0121;147 Factory Road;Pittsburgh;15201;Pennsylvania;US;true;;
+31001022-0000-4000-a000-000000000022;CUST001022;SmartHome Systems;Rachel Lewis;r.lewis@smarthome.com;+1-555-0122;258 Connected Ave;San Jose;95101;California;US;true;;

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMA Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: '72', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a6ed1 0%, #1873b4 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .apps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 900px;
+            width: 100%;
+        }
+        .app-card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            text-decoration: none;
+            color: #32363a;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        }
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .app-icon.rma {
+            background: linear-gradient(135deg, #0854a0 0%, #0a6ed1 100%);
+            color: white;
+        }
+        .app-icon.admin {
+            background: linear-gradient(135deg, #bb0000 0%, #e9730c 100%);
+            color: white;
+        }
+        .app-card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .app-card p {
+            font-size: 0.95rem;
+            color: #6a6d70;
+            line-height: 1.5;
+        }
+        .footer {
+            margin-top: 60px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RMA Management System</h1>
+        <p>Return Merchandise Authorization Processing</p>
+    </div>
+
+    <div class="apps-container">
+        <a href="/rmamanagementrmamanage/index.html" class="app-card">
+            <div class="app-icon rma">&#128230;</div>
+            <h2>Manage RMAs</h2>
+            <p>Process return requests, approve or reject RMAs, track shipments, and manage the complete RMA lifecycle.</p>
+        </a>
+
+        <a href="/rmamanagementmasterdata/index.html" class="app-card">
+            <div class="app-icon admin">&#9881;</div>
+            <h2>Master Data</h2>
+            <p>Administer products, customers, return reasons, and other reference data for the RMA system.</p>
+        </a>
+    </div>
+
+    <div class="footer">
+        <p>Built with SAP CAP + Fiori Elements | Powered by AI Agents</p>
+    </div>
+</body>
+</html>

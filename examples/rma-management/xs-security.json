@@ -1,0 +1,85 @@
+{
+  "xsappname": "rma-management",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.admin",
+      "description": "Administrator access"
+    },
+    {
+      "name": "$XSAPPNAME.agent",
+      "description": "RMA Agent access"
+    },
+    {
+      "name": "$XSAPPNAME.inspector",
+      "description": "Warehouse Inspector access"
+    },
+    {
+      "name": "$XSAPPNAME.customer",
+      "description": "Customer access"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "Admin",
+      "description": "Full administrative access",
+      "scope-references": [
+        "$XSAPPNAME.admin"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "RMAAgent",
+      "description": "RMA processing agent",
+      "scope-references": [
+        "$XSAPPNAME.agent"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "Inspector",
+      "description": "Warehouse inspector",
+      "scope-references": [
+        "$XSAPPNAME.inspector"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "Customer",
+      "description": "Customer portal access",
+      "scope-references": [
+        "$XSAPPNAME.customer"
+      ],
+      "attribute-references": []
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "RMA Administrator",
+      "description": "Full access to master data and all RMAs",
+      "role-template-references": ["$XSAPPNAME.Admin"]
+    },
+    {
+      "name": "RMA Agent",
+      "description": "Process and approve RMA requests",
+      "role-template-references": ["$XSAPPNAME.RMAAgent"]
+    },
+    {
+      "name": "RMA Inspector",
+      "description": "Inspect returned items",
+      "role-template-references": ["$XSAPPNAME.Inspector"]
+    },
+    {
+      "name": "RMA Customer",
+      "description": "Submit and track returns",
+      "role-template-references": ["$XSAPPNAME.Customer"]
+    }
+  ],
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://*.cfapps.*.hana.ondemand.com/**",
+      "https://*.hana.ondemand.com/**"
+    ]
+  }
+}

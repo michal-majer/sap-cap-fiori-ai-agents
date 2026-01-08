@@ -1,0 +1,6 @@
+code;name;descr
+NEW;New;Item is in new, unopened condition
+OPENED;Opened;Item has been opened but not used
+USED;Used;Item shows signs of use
+DAMAGED;Damaged;Item is physically damaged
+DEFECTIVE;Defective;Item has functional defects

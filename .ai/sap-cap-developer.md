@@ -225,37 +225,136 @@ entity P_Authors as projection on Authors {
 
 ## Status-Transition Flows (December 2025 - Gamma)
 
-Declaratively define allowed status transitions with `@flow.status`:
+Status-transition flows ensure transitions are explicitly modeled, validated, and executed in a controlled and reliable way, **eliminating the need for custom status-changing code**.
+
+### Modeling Status Flows
 
 ```cds
 using { TravelService } from './travel-service';
 
 annotate TravelService.Travels with @flow.status: Status actions {
-  deductDiscount  @from: [ #Open ];                    // Restricted to Open travels
+  deductDiscount  @from: [ #Open ];                           // Restricted to Open
   acceptTravel    @from: [ #Open ]     @to: #Accepted;
   rejectTravel    @from: [ #Open ]     @to: #Rejected;
   reopenTravel    @from: [ #Rejected, #Accepted ] @to: #Open;
 }
 ```
 
-**Key Features:**
-- `@from: [ #Status1, #Status2 ]` — Action only allowed from these statuses
-- `@to: #TargetStatus` — Automatically sets status after action succeeds
-- Enum symbols (`#Open`, `#Accepted`) reference the Status entity's enum values
-- Invalid transitions are automatically rejected by the framework
+### Annotations
 
-**Benefits:**
-- No custom handler code for status validation
-- Automatic rejection messages
-- `transitions_` array tracks all status changes
+| Annotation | Purpose |
+|------------|---------|
+| `@flow.status: element` | Entity-level: designates which element is flow-controlled |
+| `@from: [ #State1, #State2 ]` | Action allowed only from these states |
+| `@to: #TargetState` | Automatically sets status after action succeeds |
+| `@to: $flow.previous` | Returns to previous state (CAP tracks history) |
 
-**Testing Status Flows:**
+### Status Element Requirements
+
+The designated status element must be either:
+
+**Option 1: Direct enum**
+```cds
+entity Travels {
+  @readonly Status : TravelStatusCode default 'O';
+}
+
+type TravelStatusCode : String enum {
+  Open     = 'O';
+  Accepted = 'A';
+  Rejected = 'X';
+}
+```
+
+**Option 2: Association to CodeList with `code` enum**
+```cds
+entity Travels {
+  @readonly Status : Association to TravelStatus default 'O';
+}
+
+entity TravelStatus : sap.common.CodeList {
+  key code : String enum { Open='O'; Accepted='A'; Rejected='X'; }
+}
+```
+
+### What CAP Provides Out-of-the-Box
+
+**Generic handlers eliminate custom code:**
+- `@from` validation: Rejects action if current state not in allowed list (HTTP 409)
+- `@to` transition: Automatically updates status element after action succeeds
+- `$flow.previous` tracking: Maintains history for "undo" scenarios
+
+**Fiori UI integration:**
+- `Core.OperationAvailable` annotations auto-generated (enable/disable buttons)
+- `Common.SideEffects` annotations auto-generated (refresh displayed data)
+
+### When to Add Custom Handlers
+
+Custom handlers are only needed for **additional business fields**, not status changes.
+
+**CRITICAL: Use `before` handlers, NOT `on` handlers!**
+
+`@flow.status` provides its own `on` handler that performs the status transition. If you use `this.on()`, you **replace** this handler and the status won't change. Always use `this.before()`:
+
+```javascript
+// ✅ Correct: Use 'before' handler to set business fields
+this.before('approve', 'RMAs', async (req) => {
+    const { ID } = req.params[0];
+    await UPDATE(RMAs, ID).with({
+        approvedBy: req.user.id,
+        approvedDate: new Date().toISOString().split('T')[0]
+    });
+    // @flow.status generic 'on' handler runs AFTER this and sets status_code
+});
+```
+
+❌ **Wrong: Using `on` replaces @flow.status handler:**
+```javascript
+// DON'T DO THIS - you're replacing the @flow.status handler!
+this.on('approve', 'RMAs', async (req) => {
+    // Status will NOT change because you replaced the generic handler!
+    await UPDATE(RMAs, ID).with({ approvedBy: req.user.id });
+});
+```
+
+❌ **Also Wrong: Don't manually set status:**
+```javascript
+// DON'T DO THIS - @flow.status handles it!
+await UPDATE(RMAs, ID).with({
+    status_code: 'APPROVED'  // REDUNDANT if using @flow.status
+});
+```
+
+### Returning to Previous State
+
+Use `$flow.previous` for "unblock" or "reopen" scenarios:
+
+```cds
+annotate TravelService.Travels with @flow.status: Status actions {
+  blockTravel     @from: [#Open, #InReview]  @to: #Blocked;
+  unblockTravel   @from: #Blocked            @to: $flow.previous;  // Returns to Open or InReview
+}
+```
+
+### Current Limitations
+
+- **Draft mode**: All actions disabled while in draft state; transitions only on active entities
+- **CRUD operations**: Cannot be flow-controlled (only bound actions)
+
+### Testing Status Flows
+
 ```javascript
 const { GET, POST, expect } = cds.test(__dirname + '/..');
 
-it('should reject invalid transition', async () => {
+it('rejects invalid transition', async () => {
   const { error } = await POST('/odata/v4/travel/Travels(ID=1)/acceptTravel', {})
   expect(error).to.contain('requires "Status_code" to be')
+})
+
+it('tracks transitions', async () => {
+  await POST('/odata/v4/travel/Travels(ID=1)/blockTravel', {})
+  const { data } = await GET('/odata/v4/travel/Travels(ID=1)')
+  expect(data.transitions_).to.have.length.greaterThan(0)
 })
 ```
 
@@ -1002,6 +1101,95 @@ Enable new behavior early: `cds.features.compat_texts_entities: false`
 
 ---
 
+## Sample Data (CSV Files)
+
+### UUID Format for `cuid` Entities (CRITICAL)
+
+When using `cuid` aspect (which uses UUID keys), CSV sample data **MUST** use valid UUID format with hex-only characters (0-9, a-f).
+
+❌ **Wrong — Invalid UUIDs:**
+```csv
+ID;name
+r1001;Product A          # 'r' is not a hex character!
+c2001;Customer B         # 'c' is not a hex character!
+p3001;RMA C             # 'p' is not a hex character!
+```
+
+❌ **Still Wrong — Letter prefix not hex:**
+```csv
+ID;name
+r1001001-0000-4000-8000-000000000001;Product A   # 'r' is NOT valid hex!
+```
+
+✅ **Correct — Hex-only UUIDs:**
+```csv
+ID;name
+a1001001-0000-4000-a000-000000000001;Product A   # 'a' IS valid hex (0-9, a-f)
+31001001-0000-4000-a000-000000000001;Customer B  # Numbers are valid
+11001001-0000-4000-a000-000000000001;RMA C       # Numbers are valid
+```
+
+**Recommended Convention for Sample Data UUIDs:**
+- Use digit prefix for entity type identification: `1` for main entities, `2` for items, `3` for customers, `a` for products
+- Format: `{type}{sequence}-0000-4000-a000-{padding}`
+- Example: `a1001001-0000-4000-a000-000000000001` (product #1)
+
+**Why this matters:**
+- OData V4 strictly validates UUID format
+- Navigation to Object Pages fails with "Invalid value" error
+- The error is cryptic: `Invalid value: r1001` without explaining UUID validation
+
+---
+
+## Reserved Action Names (CRITICAL)
+
+**Never name custom actions with names that conflict with base class methods.**
+
+❌ **Wrong — Conflicts with `cds.ApplicationService` methods:**
+```cds
+entity Orders actions {
+  action reject();       // CONFLICTS with ApplicationService.reject()!
+  action error();        // CONFLICTS with error handling!
+  action emit();         // CONFLICTS with event emission!
+}
+```
+
+Warning message:
+```
+[cds] - WARNING: custom action 'reject()' conflicts with method in base class.
+Cannot add typed method for custom action 'reject' to service impl of 'MyService',
+as this would shadow equally named method in service base class 'ApplicationService'.
+```
+
+✅ **Correct — Use entity-prefixed names:**
+```cds
+entity Orders actions {
+  action rejectOrder();      // Clear, no conflict
+  action cancelOrder();      // Clear, no conflict
+  action approveOrder();     // Clear, no conflict
+}
+
+entity RMAs actions {
+  action rejectRMA(reason: String);   // Clear, entity-prefixed
+  action approveRMA();
+}
+```
+
+**Reserved names to avoid for actions:**
+- `reject` — Used by `req.reject()` for error handling
+- `error` — Used by `req.error()` for validation
+- `emit` — Used for event emission
+- `send` — Used for synchronous requests
+- `run` — Used for query execution
+- `read` — Used for entity reading
+
+**Best Practice:** Always prefix action names with the entity name for clarity:
+- `approve` → `approveTravel`, `approveRMA`, `approveOrder`
+- `reject` → `rejectTravel`, `rejectRMA`, `rejectOrder`
+- `cancel` → `cancelBooking`, `cancelOrder`
+
+---
+
 ## Anti-Patterns
 
 | ❌ Don't | ✅ Do |
@@ -1015,6 +1203,8 @@ Enable new behavior early: `cds.features.compat_texts_entities: false`
 | Imperative constraints | Use `@assert` annotations |
 | Hardcoded credentials | Destinations + profiles |
 | Trust client customer ID | Derive from req.user |
+| Non-hex UUID sample data | Use hex-only UUIDs (0-9, a-f) |
+| Action names like `reject` | Use `rejectEntity` pattern |
 
 ---
 

@@ -51,6 +51,66 @@ Master orchestrator that guides you through complete SAP CAP + Fiori development
 
 **Use for:** End-to-end projects, learning the full workflow, structured development phases
 
+## Using the AI Agents
+
+### In Claude Desktop
+
+Reference agents directly in your conversation:
+```
+Use the sap-cap-developer agent to create a domain model for my booking system
+```
+
+```
+Let sap-fiori-designer help me choose the right floorplan
+```
+
+### In VSCode/Cursor with Claude Code
+
+Skills are available in `.github/skills/` and work automatically:
+
+```
+Help me build a CAP service for product management
+(automatically uses sap-cap-developer skill)
+```
+
+Or reference explicitly:
+```
+@sap-cap-developer create entities for Products, Orders, and Customers with proper associations
+```
+
+```
+@sap-fiori-designer which floorplan should I use for processing returns?
+```
+
+### Available Agents/Skills
+
+| Agent | Purpose | Skill Location |
+|-------|---------|----------------|
+| **sap-cap-developer** | Backend (CDS, services, handlers, auth) | `.github/skills/sap-cap-developer.md` |
+| **sap-fiori-designer** | Floorplan selection & UI architecture | `.github/skills/sap-fiori-designer.md` |
+| **sap-fiori-elements-developer** | UI annotations & value helps | `.github/skills/sap-fiori-elements-developer.md` |
+| **sap-fiori-scaffolder** | Programmatic app generation | `.github/skills/sap-fiori-scaffolder.md` |
+| **sap-cap-deployment** | Deploy to SAP BTP Cloud Foundry | `.github/skills/sap-cap-deployment.md` |
+| **sap-full-stack-orchestrator** | End-to-end guided development | `.github/skills/sap-full-stack-orchestrator.md` |
+
+**Full documentation**: See `.ai/` folder for comprehensive agent guidelines.
+
+---
+
+## 📚 Learn by Example
+
+**New to SAP CAP + Fiori?** Follow our comprehensive tutorial:
+
+👉 **[Step-by-Step Tutorial: Build an RMA Management System](TUTORIAL.md)**
+
+Learn how to build a complete enterprise application in 2-3 hours using AI agents. Includes:
+- Complete walkthrough with actual prompts
+- Code examples at each step
+- Testing instructions
+- Ready for use as blog post or workshop material
+
+---
+
 ## Quick Start
 
 ### Using Individual Agents

@@ -1,0 +1,9 @@
+code;name;descr
+REQUESTED;Requested;RMA has been requested and is awaiting approval
+APPROVED;Approved;RMA has been approved and customer can ship items
+REJECTED;Rejected;RMA request has been rejected
+SHIPPED;Shipped;Items have been shipped back by customer
+RECEIVED;Received;Items have been received at warehouse
+INSPECTED;Inspected;Items have been inspected and assessed
+RESOLVED;Resolved;RMA has been resolved with appropriate action
+CLOSED;Closed;RMA is closed and finalized

@@ -1,0 +1,11 @@
+code;name;descr;requiresApproval;eligibleForRefund
+DEFECTIVE;Defective;Product is defective or malfunctioning;false;true
+WRONG_ITEM;Wrong Item;Received wrong product;false;true
+DAMAGED;Damaged in Shipping;Product was damaged during shipping;false;true
+NOT_NEEDED;No Longer Needed;Customer no longer needs the product;true;true
+NOT_AS_DESCRIBED;Not As Described;Product doesn't match description;false;true
+QUALITY_ISSUE;Quality Issue;Product has quality problems;false;true
+CHANGED_MIND;Changed Mind;Customer changed their mind;true;false
+WARRANTY_CLAIM;Warranty Claim;Returning under warranty;false;true
+MISSING_PARTS;Missing Parts;Product arrived with missing parts;false;true
+BETTER_PRICE;Better Price Found;Found better price elsewhere;true;false

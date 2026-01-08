@@ -143,7 +143,40 @@ main();
 node generate-fiori-writer.mjs
 ```
 
-## Step 4: Annotation Loading (December 2025 Update)
+## Step 4: Add Cloud Foundry Deployment Configuration
+
+After generating the Fiori app, add deployment configuration for CF:
+
+```bash
+# Install deployment tooling (if not already installed)
+npm install --save-dev @sap/ux-ui5-tooling @ui5/cli
+
+# Add CF deployment configuration
+npx -p @sap/ux-ui5-tooling fiori add deploy-config cf
+```
+
+This adds:
+- `ui5-deploy.yaml` - UI5 tooling deployment config
+- Updates `package.json` with deploy scripts
+- Configures HTML5 Application Repository deployment
+
+**Alternative: Manual package.json Configuration**
+
+If the command doesn't work, add manually to each Fiori app's `package.json`:
+
+```json
+{
+  "devDependencies": {
+    "@ui5/cli": "^4.0.33",
+    "@sap/ux-ui5-tooling": "1"
+  },
+  "scripts": {
+    "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf"
+  }
+}
+```
+
+## Step 5: Annotation Loading (December 2025 Update)
 
 **Good news!** With December 2025 CAP release, CDS now **automatically loads all `.cds` files** from `app/` and its subfolders. Manual imports in service files are often no longer needed.
 
@@ -174,7 +207,87 @@ service ProjectService @(requires: 'authenticated-user') {
 - Detail page layouts
 - Value lists and dropdowns
 
-## Step 5: Verify
+---
+
+## CRITICAL: Avoiding Duplicate Annotation Errors
+
+**When multiple Fiori apps use the SAME service entity**, you MUST use shared annotations or qualified annotation patterns to avoid CDS compilation errors.
+
+### Problem
+If `app/rma-manage/annotations.cds` and `app/rma-inspect/annotations.cds` both define `@UI.HeaderInfo` for `RMAService.RMAs`, CDS will fail with:
+```
+[ERROR] Duplicate assignment with "@UI.HeaderInfo.TypeNamePlural"
+```
+
+### Solution: Shared Common Annotations
+
+Create `app/common-annotations.cds` for shared annotations:
+
+```cds
+using RMAService as service from '../srv/rma-service';
+
+// Shared annotations - used by ALL apps
+annotate service.RMAs with @(
+    UI.HeaderInfo : {
+        TypeName : 'RMA',
+        Title : { Value : rmaNumber }
+    },
+    UI.Facets : [ /* Object Page sections */ ],
+    UI.FieldGroup #GeneralInfo : { /* Fields */ }
+);
+
+// Field-level annotations (labels, value helps)
+annotate service.RMAs with {
+    rmaNumber @Common.Label : 'RMA Number';
+    customer @Common.ValueList : { /* ... */ };
+};
+```
+
+Then each app imports common and adds ONLY app-specific annotations:
+
+```cds
+// app/rma-manage/annotations.cds
+using from '../common-annotations';  // Import shared
+using RMAService as service from '../../srv/rma-service';
+
+// App-specific ONLY - LineItem, SelectionFields, Identification
+annotate service.RMAs with @(
+    UI.SelectionFields : [rmaNumber, status_code],
+    UI.LineItem : [
+        { Value : rmaNumber },
+        { Value : status_code, Criticality : criticality }
+    ],
+    UI.Identification : [
+        { $Type : 'UI.DataFieldForAction', Action : 'RMAService.approve' }
+    ]
+);
+```
+
+### Rules for Multiple Apps Using Same Entity
+
+| Annotation Type | Where to Define | Why |
+|-----------------|-----------------|-----|
+| `@UI.HeaderInfo` | `common-annotations.cds` | Same title for all apps |
+| `@UI.Facets` | `common-annotations.cds` | Same Object Page structure |
+| `@UI.FieldGroup` | `common-annotations.cds` | Same field groupings |
+| Field labels (`@Common.Label`) | `common-annotations.cds` | Consistent naming |
+| Value helps (`@Common.ValueList`) | `common-annotations.cds` | Same dropdowns |
+| `@UI.LineItem` | `app/*/annotations.cds` | Different columns per app |
+| `@UI.SelectionFields` | `app/*/annotations.cds` | Different filters per app |
+| `@UI.Identification` | `app/*/annotations.cds` | Different actions per app |
+
+### Before Generating Second+ App
+
+**ALWAYS check:** Does another app already annotate this service entity?
+```bash
+grep -r "RMAService.RMAs" app/*/annotations.cds
+```
+
+If yes → Create `common-annotations.cds` and refactor first app before generating second.
+
+---
+
+## Step 6: Verify
 
 ```bash
 ls -la app/projects/webapp/

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMA Management - Launchpad</title>
+    <style>
+        body {
+            font-family: "72", Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #0a6ed1 0%, #0854a0 100%);
+            min-height: 100vh;
+        }
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+        }
+        .tiles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .tile {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            width: 280px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .tile:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .tile h3 {
+            margin: 0 0 10px 0;
+            color: #0a6ed1;
+        }
+        .tile p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .tile .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        .services {
+            margin-top: 40px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .services h2 {
+            color: white;
+            margin-top: 0;
+        }
+        .services a {
+            color: #a0cfff;
+            display: block;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>RMA Management System</h1>
+
+    <div class="tiles">
+        <a href="/rma-manage/webapp/index.html" class="tile">
+            <div class="icon">&#128221;</div>
+            <h3>Manage Returns</h3>
+            <p>Process and manage Return Merchandise Authorizations. Approve, reject, and track RMA requests through the complete workflow.</p>
+        </a>
+
+        <a href="/rma-inspect/webapp/index.html" class="tile">
+            <div class="icon">&#128269;</div>
+            <h3>Inspect Returns</h3>
+            <p>Receive and inspect returned items. Record conditions, complete inspections, and resolve RMAs with refund, replacement, or repair.</p>
+        </a>
+
+        <a href="/master-data/webapp/index.html" class="tile">
+            <div class="icon">&#128451;</div>
+            <h3>Master Data</h3>
+            <p>Manage products, customers, and return reason codes. Administrative functions for system configuration.</p>
+        </a>
+    </div>
+
+    <div class="services">
+        <h2>OData Services</h2>
+        <a href="/odata/v4/rma/$metadata">RMA Service Metadata</a>
+        <a href="/odata/v4/rma/RMAs">RMAs (OData)</a>
+        <a href="/odata/v4/rma/Products">Products (OData)</a>
+        <a href="/odata/v4/rma/Customers">Customers (OData)</a>
+        <a href="/odata/v4/admin/$metadata">Admin Service Metadata</a>
+    </div>
+</body>
+</html>

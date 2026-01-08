@@ -1,0 +1,155 @@
+_schema-version: "3.2"
+ID: rma-management
+version: 1.0.0
+description: "RMA Management System - SAP CAP + Fiori Elements"
+
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+
+modules:
+  # CAP Backend Service
+  - name: rma-management-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 512M
+    build-parameters:
+      builder: npm
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: rma-management-auth
+      - name: rma-management-db
+
+  # SAP HANA Database Deployer
+  - name: rma-management-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 512M
+    requires:
+      - name: rma-management-db
+
+  # Application Router (Fiori UI)
+  - name: rma-management-app
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 128M
+      disk-quota: 256M
+    build-parameters:
+      builder: npm
+      ignore:
+        - default-env.json
+        - .env
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: rma-management-auth
+      - name: rma-management-html5-repo-runtime
+    provides:
+      - name: app-url
+        properties:
+          app-url: ${default-url}
+
+  # HTML5 App Deployer
+  - name: rma-management-ui-deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: rma-management-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: rma-management-app-rma-manage
+          artifacts:
+            - rma-manage.zip
+          target-path: resources/
+        - name: rma-management-app-master-data
+          artifacts:
+            - master-data.zip
+          target-path: resources/
+
+  # RMA Manage Fiori App
+  - name: rma-management-app-rma-manage
+    type: html5
+    path: app/rma-manage
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms: []
+
+  # Master Data Fiori App
+  - name: rma-management-app-master-data
+    type: html5
+    path: app/master-data
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms: []
+
+resources:
+  # XSUAA Service (Authentication)
+  - name: rma-management-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: rma-management-${org}-${space}
+        tenant-mode: dedicated
+
+  # SAP HANA Cloud Service
+  - name: rma-management-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
+  # HTML5 Application Repository (Host)
+  - name: rma-management-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+
+  # HTML5 Application Repository (Runtime)
+  - name: rma-management-html5-repo-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
+
+  # Destination Service
+  - name: rma-management-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite

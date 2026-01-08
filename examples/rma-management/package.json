@@ -1,0 +1,58 @@
+{
+  "name": "rma-management",
+  "version": "1.0.0",
+  "description": "RMA Management System - SAP CAP + Fiori Elements",
+  "repository": "https://github.com/your-org/rma-management",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^9",
+    "express": "^4",
+    "@sap/xsenv": "^5",
+    "@sap/xssec": "^4",
+    "@cap-js/hana": "^2"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2",
+    "@sap/cds-dk": "^9",
+    "@sap-ux/fiori-elements-writer": "^2.8.30",
+    "rimraf": "^6"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch",
+    "build": "cds build --production",
+    "clean": "rimraf gen",
+    "deploy": "npm run build && cf deploy mta_archives/rma-management_1.0.0.mtar",
+    "undeploy": "cf undeploy rma-management --delete-services --delete-service-keys"
+  },
+  "cds": {
+    "requires": {
+      "[production]": {
+        "db": {
+          "kind": "hana"
+        },
+        "auth": {
+          "kind": "xsuaa"
+        }
+      },
+      "[development]": {
+        "db": {
+          "kind": "sqlite",
+          "credentials": {
+            "database": ":memory:"
+          }
+        },
+        "auth": {
+          "kind": "mocked"
+        }
+      }
+    },
+    "hana": {
+      "deploy-format": "hdbtable"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
