@@ -1,6 +1,7 @@
 ---
-name: fiori-elements-developer
+name: sap-fiori-elements-developer
 description: "Use this skill when developing SAP Fiori applications with SAP Fiori elements. It provides guidance on required annotations, explaining which to use and when, and ensures all necessary annotations are applied for specific goals. Updated for December 2025 CAP release."
+alwaysApply: false
 ---
 
 # SAP Fiori Elements Developer

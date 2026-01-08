@@ -1,6 +1,7 @@
 ---
 name: sap-fiori-designer
 description: 'This document provides guidance on selecting the appropriate SAP Fiori floorplan for your application, based on user needs and use cases. It helps determine navigation patterns, layout choices, and floorplan combinations.'
+alwaysApply: false
 ---
 
 # SAP Fiori Designer

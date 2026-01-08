@@ -31,7 +31,7 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
 **Goal:** Create working CAP backend
 
 **Steps:**
-1. **Read the skill:** `view /mnt/skills/user/sap-cap-developer/SKILL.md`
+1. **Read the skill:** See `.ai/sap-cap-developer.md`
 2. **Initialize project:**
 ```bash
    cds init .
@@ -121,7 +121,7 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
 **Goal:** Design optimal Fiori apps for each use case
 
 **Steps:**
-1. **Read the skill:** `view /mnt/skills/user/sap-fiori-designer/SKILL.md`
+1. **Read the skill:** See `.ai/sap-fiori-designer.md`
 2. **For each user role/use case, decide:**
    - **List Report Object Page (LROP):** CRUD operations, search, filters
    - **Analytical List Page (ALP):** KPIs, charts, analytics
@@ -150,7 +150,7 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
 **Goal:** Generate Fiori Elements apps
 
 **Steps:**
-1. **Read the skill:** `view /mnt/skills/user/sap-fiori-scaffolder/SKILL.md`
+1. **Read the skill:** See `.ai/sap-fiori-scaffolder.md`
 2. **For each app, run Fiori generator:**
 ```bash
    cd app/
@@ -179,7 +179,7 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
 **Goal:** Add annotations for rich UI
 
 **Steps:**
-1. **Read the skill:** `view /mnt/skills/user/sap-fiori-elements-developer/SKILL.md`
+1. **Read the skill:** See `.ai/sap-fiori-elements-developer.md`
 2. **Create annotation files** (`srv/annotations/*.cds` or `app/*/annotations.cds`):
    - `@UI.HeaderInfo` - Object page header
    - `@UI.LineItem` - Table columns
@@ -267,7 +267,7 @@ When user requests full-stack SAP development:
 
 1. **Start with Phase 1** - Ask clarifying questions
 2. **After user provides requirements, execute phases sequentially:**
-   - Always read the relevant skill file FIRST using `view` tool
+   - Always read the relevant skill file from `.ai/` folder FIRST
    - Complete each phase fully before moving to next
    - Show progress: "✅ Phase 2 complete - Backend foundation ready"
 3. **After each phase, ask:**
@@ -312,7 +312,7 @@ When user requests full-stack SAP development:
 
 ## Key Principles
 
-1. **Always read skill files FIRST** - Use `view` tool on relevant SKILL.md
+1. **Always read skill files FIRST** - Read the relevant `.ai/*.md` file
 2. **Follow CAP best practices** - `cds init`, aspects, associations
 3. **Use declarative features** - `@flow.status` for state machines, `@assert` for validation (December 2025)
 4. **Separate concerns** - flows, constraints, auth in separate files
