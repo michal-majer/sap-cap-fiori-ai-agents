@@ -1,6 +1,6 @@
 ---
 name: sap-full-stack-orchestrator
-description: Master orchestrator for end-to-end SAP CAP + Fiori development. Guides through backend setup, domain modeling, service creation, Fiori app generation, and annotation enhancement in a structured workflow.
+description: Master orchestrator for end-to-end SAP CAP + Fiori development. Guides through backend setup, domain modeling, service creation, Fiori app generation, and annotation enhancement in a structured workflow. Updated for December 2025 CAP release.
 alwaysApply: false
 ---
 
@@ -41,6 +41,7 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
    - Create entities with `cuid`, `managed` aspects
    - Define associations (NOT foreign keys)
    - Add `localized` fields if multi-language needed
+   - Use CodeList pattern for status entities
 4. **Create seed data** (`db/data/*.csv`):
    - Follow naming: `<namespace>-<EntityName>.csv`
    - Include realistic test data
@@ -64,16 +65,33 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
    - Create projections (denormalized views)
    - Add custom actions if needed
    - Example services: `CatalogService` (read-only), `AdminService` (full CRUD)
-2. **Add authorization** (`srv/access-control.cds`):
+2. **Add status flows** (`srv/*-flows.cds`) - December 2025 feature:
+   - Use `@flow.status` for declarative state transitions
+   - Example:
+   ```cds
+   annotate Service.Entity with @flow.status: Status actions {
+     approve @from: [ #Pending ] @to: #Approved;
+     reject  @from: [ #Pending ] @to: #Rejected;
+   }
+   ```
+3. **Add constraints** (`srv/*-constraints.cds`) - December 2025 feature:
+   - Use `@assert` for declarative validation
+   - Example:
+   ```cds
+   annotate Service.Entity with {
+     field @assert: (case when field < 0 then 'Must be positive' end);
+   }
+   ```
+4. **Add authorization** (`srv/access-control.cds`):
    - Service-level: `@(requires: 'admin')`
    - Entity-level: `@restrict` annotations
    - Match roles with mocked users in package.json
-3. **Create custom handlers** (`srv/*-service.js`) if needed:
+5. **Create custom handlers** (`srv/*-service.js`) if needed:
    - Validation in `before` handlers
    - Business logic in `on` handlers
    - Enrichment in `after` handlers
    - Use `req.error()` for validation, `req.reject()` for failures
-4. **Add mocked authentication** (package.json):
+6. **Add mocked authentication** (package.json):
 ```json
    {
      "cds": {
@@ -89,7 +107,7 @@ This orchestrator guides Claude through complete SAP CAP + Fiori application dev
      }
    }
 ```
-5. **Test services:**
+7. **Test services:**
 ```bash
    cds watch
 ```
@@ -262,9 +280,13 @@ When user requests full-stack SAP development:
 5. **Create files in correct locations:**
    - Domain model: `db/schema.cds`
    - Services: `srv/*-service.cds` + `srv/*-service.js`
+   - Status flows: `srv/*-flows.cds` (December 2025)
+   - Constraints: `srv/*-constraints.cds` (December 2025)
    - Authorization: `srv/access-control.cds`
-   - Annotations: `srv/annotations.cds` or `app/*/annotations.cds`
+   - Annotations: `app/*/annotations.cds` (auto-loaded from app/* subfolders)
    - Data: `db/data/*.csv`
+
+**Note (December 2025):** CDS now auto-loads all `.cds` files from `app/` subfolders - no manual imports needed!
 
 ---
 
@@ -292,23 +314,26 @@ When user requests full-stack SAP development:
 
 1. **Always read skill files FIRST** - Use `view` tool on relevant SKILL.md
 2. **Follow CAP best practices** - `cds init`, aspects, associations
-3. **One phase at a time** - Don't jump ahead
-4. **Show what was created** - Let user review before continuing
-5. **Test after each phase** - Verify with `cds watch`
-6. **Use proper file structure** - db/, srv/, app/ folders
-7. **Mocked auth for dev** - Real auth for production
+3. **Use declarative features** - `@flow.status` for state machines, `@assert` for validation (December 2025)
+4. **Separate concerns** - flows, constraints, auth in separate files
+5. **One phase at a time** - Don't jump ahead
+6. **Show what was created** - Let user review before continuing
+7. **Test after each phase** - Verify with `cds watch`
+8. **Use proper file structure** - db/, srv/, app/ folders (auto-loading enabled)
+9. **Mocked auth for dev** - Real auth for production
 
 ---
 
 ## Success Criteria
 
 ✅ Backend: Domain model + services + authorization working
+✅ Status Flows: Declarative state transitions with `@flow.status`
+✅ Validation: Declarative constraints with `@assert`
 ✅ Frontend: Fiori apps generated and accessible
 ✅ UI: Rich annotations (tables, forms, filters, value helps)
 ✅ Testing: Different users can login and see appropriate data
 ✅ Documentation: README with setup instructions
-✅ Quality: Follows all SAP CAP best practices
-```
+✅ Quality: Follows all SAP CAP best practices (December 2025)
 
 ## How to Use It
 

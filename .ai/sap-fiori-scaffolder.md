@@ -1,6 +1,6 @@
 ---
 name: sap-fiori-scaffolder
-description: "Generate SAP Fiori Elements applications for CAP projects using @sap-ux/fiori-elements-writer (v2.8.9+)"
+description: "Generate SAP Fiori Elements applications for CAP projects using @sap-ux/fiori-elements-writer (v2.8.9+). Updated for December 2025 CAP release."
 alwaysApply: false
 ---
 
@@ -143,14 +143,21 @@ main();
 node generate-fiori-writer.mjs
 ```
 
-## Step 4: Import Annotations in Service (CRITICAL)
+## Step 4: Annotation Loading (December 2025 Update)
 
-After generation, **manually add annotation imports** to `srv/project-service.cds`:
+**Good news!** With December 2025 CAP release, CDS now **automatically loads all `.cds` files** from `app/` and its subfolders. Manual imports in service files are often no longer needed.
+
+**If annotations are in `app/*/annotations.cds`:**
+- They are auto-loaded - no manual import required!
+- Place annotations in: `app/projects/annotations.cds`, `app/tasks/annotations.cds`
+
+**If annotations are in `srv/annotations/`:**
+- You still need to import them in your service file:
 
 ```cds
 using pm from '../db/schema';
 
-// Import UI annotations ← ADD THIS
+// Import UI annotations (only needed if NOT in app/ folder)
 using from './annotations/projects';
 using from './annotations/tasks';
 
@@ -159,8 +166,9 @@ service ProjectService @(requires: 'authenticated-user') {
 }
 ```
 
-**Why?** The scaffolder generates apps but doesn't include backend annotations in the service metadata. Without this import, Fiori Elements won't render:
+**Verify annotations are loaded:** Check browser DevTools → Network tab that `/metadata` includes UI annotations.
 
+**Without annotations, Fiori Elements won't render:**
 - FilterBar fields
 - Table columns
 - Detail page layouts

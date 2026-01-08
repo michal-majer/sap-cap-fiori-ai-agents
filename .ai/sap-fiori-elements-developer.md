@@ -1,6 +1,6 @@
 ---
 name: fiori-elements-developer
-description: "Use this skill when developing SAP Fiori applications with SAP Fiori elements. It provides guidance on required annotations, explaining which to use and when, and ensures all necessary annotations are applied for specific goals."
+description: "Use this skill when developing SAP Fiori applications with SAP Fiori elements. It provides guidance on required annotations, explaining which to use and when, and ensures all necessary annotations are applied for specific goals. Updated for December 2025 CAP release."
 ---
 
 # SAP Fiori Elements Developer
@@ -222,6 +222,76 @@ annotate TravelService.Travel with @UI: { ... };
 - Fiori Elements uses the entity set name to construct proper OData URLs
 - Without it, navigation from List Report to Object Page will fail
 - The pattern determines the URL structure: `/Complaints(guid'...')`
+
+---
+
+## December 2025 Features
+
+### New @hierarchy Annotation
+
+Simplify hierarchical tree views with the new `@hierarchy` annotation:
+
+```cds
+// NEW (December 2025) - Simple and clean
+annotate AdminService.Genres with @hierarchy;
+
+// OLD - Elaborate OData annotations required previously
+// annotate AdminService.Genres with @(
+//   Org.OData.Aggregation.V1.RecursiveHierarchy#GenreHierarchy: {
+//     NodeProperty: ID,
+//     ParentNavigationProperty: parent
+//   }
+// );
+```
+
+The `@hierarchy` annotation automatically generates all required OData hierarchy annotations.
+
+### Enums in Annotation Expressions (December 2025)
+
+You can now use enum symbols directly in annotation expressions instead of hardcoded values:
+
+```cds
+entity Travel {
+  key TravelUUID : UUID;
+  status : String(1) enum { Open = 'O'; Accepted = 'A'; Canceled = 'X'; };
+
+  // OLD - Using hardcoded values (confusing)
+  // @Common.FieldControl: (status = 'A' ? 1 : 7)
+
+  // NEW - Using enum symbols (self-documenting)
+  @Common.FieldControl: (status = #Accepted ? #ReadOnly : #Mandatory)
+  bookingFee : Decimal(16,3) default 0;
+}
+```
+
+**Benefits:**
+- Self-documenting code
+- No need to remember magic numbers
+- Enum symbols map to OData standard values (`#ReadOnly` = 1, `#Mandatory` = 7)
+
+**Common FieldControl Enum Values:**
+- `#Mandatory` (7) - Required field
+- `#Optional` (3) - Editable field
+- `#ReadOnly` (1) - Read-only field
+- `#Hidden` (0) - Hidden field
+
+**Example with Status-Based Visibility:**
+
+```cds
+annotate TravelService.Travels with {
+  // Field editable only when status is Open
+  Description @Common.FieldControl: (Status.code = #Open ? #Optional : #ReadOnly);
+
+  // Show rejection comment only when rejected
+  rejectionComment @UI.Hidden: (Status.code != #Rejected);
+
+  // Criticality using enum
+  Status_code @Common.FieldControl: (
+    Status.code = #Accepted ? #ReadOnly :
+    Status.code = #Rejected ? #ReadOnly : #Optional
+  );
+}
+```
 
 ---
 
@@ -2315,3 +2385,5 @@ export default class CustomHeaderExtend extends BaseControllerExtension {
 11. **Contact cards** — Professional display for customer data
 12. **Validation** — Use ValueListForValidation for data quality
 13. **Actions visible** — Use @Core.OperationAvailable for conditional display
+14. **Use @hierarchy** — Simplify tree views (December 2025)
+15. **Use enum symbols** — Self-documenting annotation expressions (December 2025)
